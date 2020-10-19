@@ -1,0 +1,419 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+ %REM
+	Library Foundry
+	Created Oct 9, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+Use "NotesHttpRequestHelper"
+Use "FluentNotesJson"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class NotesAgent_JsonHTTPHelper As NotesAgent_GenericHTTPHelper
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+%REM
+	Class NotesAgent_JsonHTTPContent
+	Description: Comments for Class
+%END REM
+Class NotesAgent_JsonHTTPHelper As NotesAgent_GenericHTTPHelper
+	Private m_RequestBodyJSON As NotesJSONNavigator
+	Private m_LogErrorOnBadPointer As Boolean
+	Private m_tmpVar As Variant
+	Private m_ResponseBodyJSON As NotesJSONNavigatorFluent
+
+	%REM
+		Sub New
+		Description: Comments for Sub
+	%END REM
+	Sub New(doc As NotesDocument), NotesAgent_GenericHTTPHelper(doc)
+
+	On Error GoTo logErr
+
+	If (m_ContentType = "application/json") Then
+		Set m_RequestBodyJSON = doc.ParentDatabase.Parent.createJsonNavigator(getRequestBodyAsString())
+	Else
+		m_Valid = False
+	End If
+	Set m_ResponseBodyJSON = New NotesJsonNavigatorFluent(doc.ParentDatabase.Parent, "")
+	m_LogErrorOnBadPointer = false
+
+	Exit Sub
+	
+logErr:
+		Call LogError()
+		m_Valid = False
+	End Sub
+	
+	%REM
+		Sub loadJson
+		Description: Comments for Sub
+	%END REM
+	Sub loadJson(session As NotesSession, json As String)
+
+	On Error GoTo logErr
+
+		Set m_RequestBodyJSON = session.Createjsonnavigator(json)
+
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	Exit Sub
+	End Sub
+	
+	%REM
+		Function getCallbackUrl
+		Description: Callback URL is expected from the body, with the pointer "/callbackUrl"
+	%END REM
+	Function getCallbackUrl As String
+		Dim tmpStr As String
+		Dim tmpLogErrorOnBadPointer As Boolean
+
+		On Error GoTo logErr
+		On Error 1501 goto quit
+
+		tmpLogErrorOnBadPointer = m_LogErrorOnBadPointer
+		m_LogErrorOnBadPointer = false
+		Call findStringByPointer("/callbackUrl", getCallbackUrl)
+
+quit:		
+		m_LogErrorOnBadPointer = tmpLogErrorOnBadPointer
+	Exit Function
+		
+logErr:
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getRequestBodyAsJson
+		Description: Comments for Function
+	%END REM
+	Function getRequestBodyAsJson() As NotesJSONNavigator
+
+	On Error GoTo logErr
+
+		Set getRequestBodyAsJson = m_RequestBodyJSON
+		
+	Exit Function
+		
+logErr:
+	Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonObjectByPointer
+		Description: Comments for Function
+	%END REM
+	Function findJsonObjectByPointer(pointer As String, retVal As NotesJSONObject) As Boolean
+		Dim jsonElem As NotesJSONElement
+
+	On Error GoTo logErr
+		Set jsonElem = getJsonElemValue(Pointer)
+		
+		If (jsonElem.Type <> Type_JsonObject) Then
+			Error BAD_JSON_TYPE, getParsingErrorMessage(pointer, jsonElem.type, Type_JsonObject)
+		Else
+			Set retVal = jsonElem.Value
+			findJsonObjectByPointer = True
+		End If
+		
+		Exit Function
+		
+logErr:
+		If (Err = 1501) Then
+			If (m_LogErrorOnBadPointer) Then
+				Call LogError()
+				Exit Function
+			Else
+				Exit Function
+			End If
+		End If
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonObjectByPointer
+		Description: Comments for Function
+	%END REM
+	Function findJsonArrayByPointer(pointer As String, retVal As NotesJSONArray) As Boolean
+		Dim jsonElem As NotesJSONElement
+
+	On Error GoTo logErr
+		Set jsonElem = getJsonElemValue(Pointer)
+		
+		If (jsonElem.Type <> Type_JsonArray) Then
+			Error BAD_JSON_TYPE, getParsingErrorMessage(pointer, jsonElem.type, Type_JsonArray)
+		Else
+			Set retVal = jsonElem.Value
+			findJsonArrayByPointer = true
+		End If
+		
+	Exit Function
+		
+logErr:
+		If (Err = 1501) Then
+			If (m_LogErrorOnBadPointer) Then
+				Call LogError()
+				Exit Function
+			Else
+				Exit Function
+			End If
+		End If
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonObjectByPointer
+		Description: Comments for Function
+	%END REM
+	Function findStringByPointer(pointer As String, retVal As String) As Boolean
+		Dim tmpVar As Variant
+		Dim jsonElem As NotesJSONElement
+
+		On Error GoTo logErr
+		
+		Set jsonElem = getJsonElemValue(Pointer)
+		
+		If (jsonElem.Type <> Type_JsonString) Then
+			Error BAD_JSON_TYPE, getParsingErrorMessage(pointer, jsonElem.type, Type_JsonString)
+		Else
+			retVal = CStr(jsonElem.Value)
+			findStringByPointer = True
+		End If
+
+		Exit Function
+		
+logErr:
+		If (Err = 1501) Then
+			If (m_LogErrorOnBadPointer) Then
+				Call LogError()
+				Exit Function
+			Else
+				Exit Function
+			End If
+		End If
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonObjectByPointer
+		Description: Comments for Function
+	%END REM
+	Function findDoubleByPointer(pointer As String, retVal As Double) As Boolean
+		Dim jsonElem As NotesJSONElement
+
+		On Error GoTo logErr
+		Set jsonElem = getJsonElemValue(Pointer)
+		
+		If (jsonElem.Type <> Type_JsonNumber) Then
+			Error BAD_JSON_TYPE, getParsingErrorMessage(pointer, jsonElem.type, Type_JsonNumber)
+		Else
+			retVal = jsonElem.Value
+			findDoubleByPointer = true
+		End If
+
+		Exit Function
+		
+logErr:
+		If (Err = 1501) Then
+			If (m_LogErrorOnBadPointer) Then
+				Call LogError()
+				Exit Function
+			Else
+				Exit Function
+			End If
+		End If
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonObjectByPointer
+		Description: Comments for Function
+	%END REM
+	Function findBooleanByPointer(pointer As String, retVal As Boolean) As Boolean
+		Dim jsonElem As NotesJSONElement
+
+	On Error GoTo logErr
+		Set jsonElem = getJsonElemValue(Pointer)
+		
+		If (jsonElem.Type <> Type_JsonBoolean) Then
+			Error BAD_JSON_TYPE, getParsingErrorMessage(pointer, jsonElem.type, Type_JsonBoolean)
+		Else
+			retVal = jsonElem.Value
+			findBooleanByPointer = True
+		End If
+		
+	Exit Function
+		
+logErr:
+		If (Err = 1501) Then
+			If (m_LogErrorOnBadPointer) Then
+				Call LogError()
+				Exit Function
+			Else
+				Exit Function
+			End If
+		End If
+		Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getJsonElemValue
+		Description: Comments for Function
+	%END REM
+	Private Function getJsonElemValue(pointer As String) As Variant
+
+	On Error GoTo logErr
+
+		If (Not pointer Like "/*") Then
+			Error BAD_JSON_POINTER, |JSON Pointers are expected to start "/"|
+		End If
+		
+		Set getJsonElemValue = getRequestBodyAsJson().Getelementbypointer(Pointer)
+getOut:
+	Exit Function
+		
+logErr:
+		If (Err = 4843) Then
+			'On error goto 0
+			Error BAD_JSON_POINTER, "No element could be found at " & pointer
+		Else
+			Call addToStackTrace()
+		End If
+		'Resume getOut
+	End Function
+	
+	%REM
+		Function GetObjectsArray
+		Description: Comments for Function
+	%END REM
+	Function GetNotesJSONElementsFromArray(session As NotesSession, arrayPointer As String, objectPointer As String) As Variant
+		Dim arr As NotesJSONArray
+		Dim elem As NotesJSONElement, returnElem As NotesJSONElement
+		Dim counter As Integer
+		Dim pointer As String
+		Dim returnArray As Variant
+
+	On Error GoTo logErr
+		
+		If (Not objectPointer Like "/*") Then
+			Error BAD_JSON_POINTER, |JSON Pointers are expected to start "/"|
+		End If
+
+		Call findJsonArrayByPointer(arrayPointer, arr)
+		counter = 0
+		redim returnArray(arr.Size - 1)
+		Set elem = arr.Getfirstelement()
+		While Not elem Is Nothing
+			pointer = arrayPointer & "/" & CStr(counter) & objectPointer
+			Set returnArray(counter) = getJsonElemValue(Pointer)
+			counter = counter + 1
+			Set elem = arr.Getnextelement()
+		Wend
+		
+		GetNotesJSONElementsFromArray = returnArray
+		
+	Exit Function
+		
+logErr:
+	Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function convertJsonTypeToName
+		Description: Comments for Function
+	%END REM
+	Private Function convertJsonTypeToName(typeInt As Integer) As String
+
+	On Error GoTo logErr
+
+		Select Case typeInt
+			Case 1:
+				convertJsonTypeToName = "JSON Object"
+			Case 2:
+				convertJsonTypeToName = "JSON Array"
+			Case 3:
+				convertJsonTypeToName = "String"
+			Case 4:
+				convertJsonTypeToName = "Number"
+			Case 5:
+				convertJsonTypeToName = "Boolean"
+			Case 64:
+				convertJsonTypeToName = "empty"
+		End Select
+		
+	Exit Function
+		
+logErr:
+	Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function getParsingErrorMessage
+		Description: Comments for Function
+	%END REM
+	Private Function getParsingErrorMessage(pointer As String, foundType As Integer, expectedType As Integer) As String
+
+	On Error GoTo logErr
+
+		getParsingErrorMessage = "JSON parsing for " & pointer & " worked, but returned " & convertJsonTypeToName(foundType) & " (" & CStr(foundType) & ") instead of " & convertJsonTypeToName(expectedType)  & "(" & CStr(expectedType) & ")"
+		
+	Exit Function
+		
+logErr:
+	Call AddToStackTrace()
+	End Function
+	
+	%REM
+		Function SetSuppressPointerDoesNotExist
+		Description: Comments for Function
+	%END REM
+	Function SetLogErrorOnBadPointer(newVal As Boolean)
+
+		m_LogErrorOnBadPointer = newVal
+	
+	End Function
+	
+	%REM
+		Sub addErrorMessage
+		Description: Comments for Function
+	%END REM
+	Sub closeRequestWithError(msg As String, httpStatus As Integer)
+				
+		If (IsNull(httpStatus)) Then
+			m_ResponseStatus = 500
+		Else
+			m_ResponseStatus = httpStatus
+		End If
+		Call m_ResponseBodyJSON.Appendelement(msg, "error")
+		If (m_ResponseBody = "") Then
+			m_responseBody = m_ResponseBodyJSON.Stringify()
+		End If
+		Call addResponseHeader("Content-Type", "application/json")
+		Call closeRequest()
+		
+	End Sub
+	
+	%REM
+		Function getJSONResponseBody
+		Description: Comments for Function
+	%END REM
+	Function getJSONResponseBody() As NotesJSONNavigatorFluent
+
+		Set getJSONResponseBody = m_ResponseBodyJSON
+	
+	End Function
+	
+	%REM
+		Sub closeRequest
+		Description: Comments for Sub
+	%END REM
+	Sub closeRequest()
+		
+		Call setResponseBody(getJSONResponseBody().Stringify())
+		NotesAgent_GenericHTTPHelper..closeRequest
+		
+	End Sub
+End Class

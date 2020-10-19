@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='utf-8'?>
+<agent name='(RunAgentAsync)' xmlns='http://www.lotus.com/dxl' version='11.0'
+ maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
+ designerversion='8.5.3'>
+<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='8'>
+<created><datetime dst='true'>20201015T114621,87+01</datetime></created>
+<modified><datetime>20201016T132939,68+00</datetime></modified>
+<revised><datetime>20201016T132939,67+00</datetime></revised>
+<lastaccessed><datetime>20201016T132939,67+00</datetime></lastaccessed>
+<addedtofile><datetime>20201015T133431,74+00</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
+<designchange><datetime dst='true'>20201016T142938,90+01</datetime></designchange>
+<trigger type='agentlist'/>
+<documentset type='runonce'/><code event='options'><lotusscript>%REM
+	Agent RunAgentAsync
+	Created Oct 14, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "NotesHttpJsonRequestHelper"
+
+</lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
+	Dim s As New NotesSession
+	Dim doc As NotesDocument, schedDoc As NotesDocument, actionDoc As NotesDocument
+	Dim httpRequest As NotesAgent_JsonHTTPHelper
+	Dim agentName As String, callbackUrl As String, method As String
+	Dim dbPath As String, payloadAsString As String, unid As String
+	Dim payload As NotesJSONObject
+	Dim elem As NotesJSONElement
+	Dim returnFields As NotesJSONArray
+	Dim isNotFirstElem As Boolean
+	Dim counter As Integer
+	
+	On Error GoTo logErr
+	
+	Set doc = s.Documentcontext
+	Set httpRequest = New NotesAgent_JsonHTTPHelper(doc)
+	If (httpRequest.IsValid()) Then
+		If (httpRequest.findStringByPointer("/dbPath", dbPath)) Then
+			If (httpRequest.findStringByPointer("/agentName", agentName)) Then
+				callbackUrl = httpRequest.getCallbackUrl()
+				If (callbackUrl &lt;&gt; "") Then
+					If (httpRequest.findStringByPointer("/method", method)) Then
+						If (httpRequest.findJsonObjectByPointer("/payload", payload)) Then
+							payloadAsString = |{|
+							Set elem = payload.Getfirstelement()
+							While Not (elem Is Nothing)
+								If (isNotFirstElem) Then
+									payloadAsString = payloadAsString &amp; |,|
+								Else
+									isNotFirstElem = False
+								End If
+								Select Case elem.Type
+								Case Type_JsonNumber:
+								Case Type_JsonBoolean:
+								Case Type_JsonString:
+									' We need to handle date/date-time/time strings!
+									payloadAsString = payloadAsString &amp; |"| &amp; elem.Name &amp; |":"| &amp; CStr(elem.Value) &amp; |"|
+								Case Else
+									Call LogErrorEx("Unexpected value found for /payload/" &amp; elem.Name, 0, Nothing)
+							End Select
+								Set elem = payload.Getnextelement()
+							Wend
+							payloadAsString = payloadAsString &amp; |}|
+						End If
+					End If
+						
+					If (httpRequest.findStringByPointer("/unid", unid)) Then
+						If (dbPath = "") Then
+							Set actionDoc = s.Currentdatabase.Getdocumentbyunid(unid)
+						Else
+							Dim db As NotesDatabase
+							Set db = s.Getdatabase("", dbPath, False)
+							If (Not db Is Nothing) Then
+								Set actionDoc = db.Getdocumentbyunid(unid)
+							End If
+						End If
+					End If
+		
+					redim m_returnFields(0)
+					If (httpRequest.findJsonArrayByPointer("/returnFields", returnFields)) Then
+						ReDim m_returnFields(returnFields.size - 1)
+						Set elem = returnFields.Getfirstelement()
+						counter = 0
+						While Not elem Is Nothing
+							m_returnFields(counter) = elem.value
+							Set elem = returnFields.Getnextelement()
+							counter = counter + 1
+						Wend
+					End If
+					
+					Set schedDoc = s.Currentdatabase.Createdocument()
+					With schedDoc
+						.Form = "AsyncHttpRequest"
+						.agentName = agentName
+						.dbPath = dbPath
+						.method = UCase(method)
+						.callbackUrl = callbackUrl
+						.payload = payloadAsString
+						.actionDocUnId = actionDoc.universalID
+						.requestID = Evaluate(|@Unique|)
+						.status = "Pending"
+						.save True, False
+					End With
+					Call httpRequest.setResponseStatus(201)
+					Call httpRequest.getJSONResponseBody()_
+						.appendElementFluent("Processing", "status")_
+						.appendElementFluent(schedDoc.requestID(0), "requestID")
+					Exit Sub
+				End If
+			End If
+		End If
+		Call httpRequest.closeRequestWithError("agentName, callbackUrl and payload elements are expected in body", HTTP_STATUS_BAD_REQUEST)
+	End If
+	
+	Exit Sub
+	
+logErr:
+	Select Case Err
+		Case 4091:
+			Call LogErrorEx("Invalid document UNID passed to NotesAgent_FoundryHTTPHelper: " &amp; unid, 0, Nothing)
+			Call httpRequest.closeRequestWithError("Invalid document UNID passed", HTTP_STATUS_BAD_REQUEST)
+		Case Else:
+			Call LogError()
+			Call httpRequest.closeRequestWithError(|{"error":"Unexpected error in processing"}|, HTTP_STATUS_BAD_REQUEST)
+	End Select
+	Exit Sub
+End Sub</lotusscript></code>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime dst='true'>20201016T142937,18+01</datetime></agentmodified></rundata></agent>
+

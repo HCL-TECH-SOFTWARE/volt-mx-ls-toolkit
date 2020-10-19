@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="00258602004A9092" version="11.0">
+<noteinfo xmlns="" noteid="156" sequence="2" unid="EEC9079F9975048980258602003B23C2">
+<created><datetime dst="true">20201015T114557,78+01</datetime></created>
+<modified><datetime>20201015T133430,19+00</datetime></modified>
+<revised><datetime dst="true">20201015T141637,35+01</datetime></revised>
+<lastaccessed><datetime>20201015T133430,18+00</datetime></lastaccessed>
+<addedtofile><datetime>20201015T133430,18+00</datetime></addedtofile></noteinfo>
+<updatedby xmlns=""><name>CN=Paul S Withers/O=paulswithers</name><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby xmlns=""><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
+<item xmlns="" name="$TITLE" sign="true"><text>NotesHttpConstants</text></item>
+<item xmlns="" name="$Flags"><text>s34Q</text></item>
+<item xmlns="" name="$PublicAccess" sign="true"><text>1</text></item>
+<item xmlns="" name="$DesignerVersion"><text>8.5.3</text></item>
+
+</note>

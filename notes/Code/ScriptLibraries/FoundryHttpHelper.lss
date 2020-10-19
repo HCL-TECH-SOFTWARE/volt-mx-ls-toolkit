@@ -1,0 +1,216 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library FoundryHttpHandler
+	Created Oct 12, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+Use "NotesHttpJsonRequestHelper"
+Use "NotesHttpConstants"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+%REM
+	Class FoundryHttpHelper
+	Description: Expects a payload of format:
+	{
+		"unid": "3351888600E956CC802585FF004E32E1",
+		"dbPath": "extlib/xpagesext.nsf",
+		"payload": {
+			"Status": "Approved",
+			"ApprovalComments": "Thank you"
+		},
+		"returnItems": [
+			"FirstName",
+			"LastName",
+			"Email",
+			"City",
+			"State"
+		]
+	}
+%END REM
+Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
+	
+	Private db As NotesDatabase	'Needs to be here, parent database needs to be in memory
+	Private m_actionUnid As String
+	Private m_actionDoc As NotesDocument
+	Private m_boolean_true As Variant
+	Private m_boolean_false As Variant
+	Private m_returnFields As Variant
+	
+	%REM
+		Sub new
+		Description: Comments for Sub
+	%END REM
+	Sub New(doc As NotesDocument), NotesAgent_JsonHTTPHelper(doc)
+		Dim s As New NotesSession
+		Dim sourceDoc As NotesDocument
+		Dim unid As String, dbPath As String
+		Dim returnFields As NotesJSONArray
+		Dim elem As NotesJSONElement
+		Dim counter As Integer
+
+		On Error GoTo logErr
+		If (findStringByPointer("/dbPath", dbPath)) Then
+			Set db = s.getDatabase("", dbPath, False)
+			If (db Is Nothing) Then
+				Call closeRequestWithError("Database not found at path " & dbPath, HTTP_STATUS_BAD_REQUEST)
+				Exit Sub
+			End If
+		Else
+			Set db = doc.parentDatabase
+		End If
+		If (findStringByPointer("/unid", unid)) Then
+			m_actionUnid = unid
+			Set m_actionDoc = db.getdocumentbyUNID(unid)
+			m_Valid = True
+		Else
+			Call closeRequestWithError("Document not found: " & unid, HTTP_STATUS_BAD_REQUEST)
+			Exit Sub
+		End If
+		
+		redim m_returnFields(0)
+		If (findJsonArrayByPointer("/returnFields", returnFields)) Then
+			ReDim m_returnFields(returnFields.size - 1)
+			Set elem = returnFields.Getfirstelement()
+			counter = 0
+			While Not elem Is Nothing
+				m_returnFields(counter) = elem.value
+				Set elem = returnFields.Getnextelement()
+				counter = counter + 1
+			Wend
+		End If
+		
+		m_boolean_true = 1
+		m_boolean_false = 0
+
+	Exit Sub
+	
+logErr:
+		m_Valid = False
+		Select Case Err
+			Case 4091:
+				Call LogErrorEx("Invalid document UNID passed to NotesAgent_FoundryHTTPHelper: " & m_actionUnid, 0, Nothing)
+			Case Else
+				Call LogError()
+		End Select
+		Exit Sub
+	End Sub
+	
+	%REM
+		Function getActionDocUnid
+		Description: Comments for Function
+	%END REM
+	Function getActionDocUnid() As String
+		getActionDocUnid = m_actionUnid
+	End Function
+	
+	%REM
+		Function getActionDoc
+		Description: Comments for Function
+	%END REM
+	Function getActionDoc() As NotesDocument
+		
+		Set getActionDoc = m_actionDoc
+		
+	End Function
+	
+	%REM
+		Sub updateActionDoc
+		Description: Updates the document with the payload, but doesn't save it
+	%END REM
+	Sub updateActionDoc()
+
+	On Error GoTo logErr
+		Dim payload As NotesJSONObject
+		Dim elem As NotesJSONElement
+		
+		If (findJsonObjectByPointer("/payload", payload)) Then
+			Set elem = payload.Getfirstelement()
+			While Not (elem Is Nothing)
+				Select Case elem.Type
+				Case Type_JsonNumber:
+					Call m_actionDoc.Replaceitemvalue(elem.Name, elem.Value)
+				Case Type_JsonString:
+					' We need to handle date/date-time/time strings!
+					Call m_actionDoc.Replaceitemvalue(elem.Name, elem.Value)
+				Case Type_JsonBoolean:
+					If (elem.Value) Then
+						Call m_actionDoc.Replaceitemvalue(elem.Name, m_boolean_true)
+					Else
+						Call m_actionDoc.Replaceitemvalue(elem.Name, m_boolean_true)
+					End If
+				Case Else
+					Call LogErrorEx("Unexpected value found for /payload/" & elem.Name, 0, Nothing)
+				End Select
+				Set elem = payload.Getnextelement()
+			Wend
+		Else
+			Call LogErrorEx("No payload was passed for updating " & m_actionUnid, 0, m_actionDoc)
+			Exit Sub
+		End If
+
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	Exit Sub
+	End Sub
+	
+	%REM
+		Sub addReturnFieldsToResponseBody
+		Description: Comments for Sub
+	%END REM
+	Sub addReturnFieldsToResponseBody()
+
+	On Error GoTo logErr
+
+	Call addResponseHeader("Content-Type", "application/json")
+	If (m_returnFields(0) = "") Then
+		ForAll itm In getActionDoc().Items
+			If (Not itm.name Like "$*") Then
+				Call getJSONResponseBody().appendElement(itm.Text, itm.name)
+			End If
+		End ForAll
+	Else
+		ForAll fieldName In m_returnFields
+			If (getActionDoc.Hasitem(CStr(fieldName))) Then
+				Call getJSONResponseBody().appendElement(getActionDoc().Getfirstitem(fieldName).Text, CStr(fieldName))
+			Else
+				Call getJSONResponseBody().appendElement("", CStr(fieldName))
+			End If
+		End ForAll
+	End If
+		Call getJSONResponseBody().appendElement(getActionDocUnid(), "@unid")
+
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	Exit Sub
+	End Sub
+	
+	%REM
+		Function getReturnFields
+		Description: Comments for Function
+	%END REM
+	Function getReturnFields() As Variant
+
+		getReturnFields = m_returnFields
+		
+	End Function
+	
+	%REM
+		Sub setBooleanTranslationSettings
+		Description: Comments for Sub
+	%END REM
+	Sub setBooleanTranslationSettings(trueVal As Variant, falseVal As Variant)
+		m_boolean_true = trueVal
+		m_boolean_false = falseVal
+	Exit Sub
+	End Sub
+
+End Class

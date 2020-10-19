@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8'?>
+<agent name='ProcessAsyncRequests' xmlns='http://www.lotus.com/dxl' version='11.0'
+ maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
+ designerversion='8.5.3' activatable='false'>
+<noteinfo noteid='18a' unid='A0AB836CE596B44980258602003B2D2E' sequence='8'>
+<created><datetime dst='true'>20201015T114621,90+01</datetime></created>
+<modified><datetime>20201015T140135,94+00</datetime></modified>
+<revised><datetime>20201015T140135,93+00</datetime></revised>
+<lastaccessed><datetime>20201015T140135,93+00</datetime></lastaccessed>
+<addedtofile><datetime>20201015T133432,89+00</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
+<designchange><datetime dst='true'>20201015T150136,07+01</datetime></designchange>
+<trigger type='scheduled'>
+<schedule type='byminutes' hours='0' minutes='2' runlocation='any'/></trigger><code
+ event='options'><lotusscript>%REM
+	Agent ProcessAsyncRequests
+	Created Oct 14, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+
+
+</lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
+	Dim s As New NotesSession
+	Dim view As NotesView
+	Dim db As NotesDatabase, actDb As NotesDatabase
+	Dim doc As NotesDocument
+	Dim agent As NotesAgent
+	
+	Set db = s.Currentdatabase
+	Set view = db.Getview("AsyncRequests")
+	Set doc = view.Getfirstdocument()
+	While (Not doc Is Nothing)
+		If (doc.status(0) = "Pending") Then
+			If (doc.dbPath(0) = "") Then
+				Set agent = db.Getagent(doc.agentName(0))
+				Call agent.Run(doc.Noteid)
+			Else
+				Set actDb = s.Getdatabase(db.Server, doc.dbPath(0), False)
+				Dim tmpDoc As NotesDocument
+				Set tmpDoc = actDb.Createdocument()
+				Call doc.Copyallitems(tmpDoc, False)
+				If (actDb Is Nothing) Then
+					doc.status = "Failed"
+					doc.error = "Database not found"
+					Call doc.save(True, False)
+				Else
+					Set agent = actDb.Getagent(doc.agentName(0))
+					Call agent.RunWithDocumentContext(tmpDoc)
+				End If
+			End If
+			Call doc.Replaceitemvalue("Status", "Processed")
+			Call doc.save(True, False)
+		End If
+		Set doc = view.Getnextdocument(doc)
+	Wend
+End Sub</lotusscript></code>
+<rundata processeddocs='0' exitcode='0' agentdata='BA6A64EDCC729EF500258602004D3383'>
+<agentmodified><datetime>20201015T140135,94+00</datetime></agentmodified>
+<agentrun><datetime>20201019T102714,50+00</datetime></agentrun>
+<runlog>Started running agent 'ProcessAsyncRequests' on 10/19/2020 10:27:14 AM
+Found 0 document(s) that match search criteria
+Ran LotusScript code
+Done running agent 'ProcessAsyncRequests' on 10/19/2020 10:27:14 AM
+</runlog></rundata></agent>
+

@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<agent name='(EchoDoc)' xmlns='http://www.lotus.com/dxl' version='11.0' maintenanceversion='1.0'
+ replicaid='00258602004A9092' hide='v3' publicaccess='false' designerversion='8.5.3'
+ restrictions='unrestricted'>
+<noteinfo noteid='16a' unid='02FCB202D30716A680258602003B2D2A' sequence='2'>
+<created><datetime dst='true'>20201015T114621,86+01</datetime></created>
+<modified><datetime>20201015T133431,36+00</datetime></modified>
+<revised><datetime dst='true'>20201015T141637,69+01</datetime></revised>
+<lastaccessed><datetime>20201015T133431,35+00</datetime></lastaccessed>
+<addedtofile><datetime>20201015T133431,35+00</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Paul S Withers/O=paulswithers</name><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
+<designchange><datetime dst='true'>20201015T141637,67+01</datetime></designchange>
+<trigger type='agentlist'/>
+<documentset type='runonce'/><code event='options'><lotusscript>%REM
+	Agent EchoDoc
+	Created Oct 14, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "NotesHttpJsonRequestHelper"
+
+</lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Dim agent As NotesAgent
+	Dim doc As NotesDocument, actionDoc As NotesDocument
+	Dim httpRequest As NotesHTTPRequest
+	Dim jsonNav As NotesJSONNavigator
+	Dim payload As NotesJSONObject
+	Dim response As String
+	
+	On Error GoTo logErr
+	
+	Sleep (15)
+	Set db = s.Currentdatabase
+	Set agent = s.Currentagent
+	Set doc = db.Getdocumentbyid(agent.Parameterdocid)
+	Set actionDoc = db.Getdocumentbyunid(doc.actionDocUnId(0))
+	Set httpRequest = s.Createhttprequest()
+	If (doc.method(0) = "POST") Then
+		Set jsonNav = s.Createjsonnavigator("")
+		Set payload = jsonNav.Appendobject("response")
+		Call payload.Appendelement(actionDoc.Universalid, "@unid")
+		ForAll itm In actionDoc.Items
+			Call payload.Appendelement(itm.Text, itm.Name)
+		End ForAll
+		Call httpRequest.Setheaderfield("Content-Type", "application/json")
+		httpRequest.Preferstrings = True
+		response = httpRequest.Post(doc.callbackUrl(0), jsonNav.Stringify())
+		doc.status = "Processed"
+		Call doc.save(True, False)
+		MsgBox response
+	End If
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	Exit Sub 
+End Sub</lotusscript></code>
+<rundata processeddocs='0' exitcode='0' agentdata='B54F711F1D45EDAE80258601003A7443'>
+<agentmodified><datetime dst='true'>20201014T113626,08+01</datetime></agentmodified>
+<agentrun><datetime dst='true'>20201014T122043,78+01</datetime></agentrun>
+<runlog>Started running agent 'EchoDoc' on 14/10/2020 12:20:28
+Ran LotusScript code
+Done running agent 'EchoDoc' on 14/10/2020 12:20:43
+</runlog></rundata></agent>
+

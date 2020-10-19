@@ -1,0 +1,28 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library NotesHttpConstants
+	Created Oct 12, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Const BAD_JSON_POINTER = 1501
+Const BAD_JSON_TYPE = 1502
+Const BAD_ACTION_UNID = 1503
+
+Const Type_JsonObject = 1
+Const Type_JsonArray = 2
+Const Type_JsonString = 3
+Const Type_JsonNumber = 4
+Const Type_JsonBoolean = 5
+Const Type_JsonEmpty = 64
+
+Const HTTP_STATUS_BAD_REQUEST = 400
+Const HTTP_STATUS_NOT_ALLOWED = 403
+Const HTTP_STATUS_CODE_ERROR = 500
+Const HTTP_STATUS_INVALID_METHOD = 405

@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<agent name='(TestFoundryAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
+ maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
+ designerversion='8.5.3'>
+<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='18'>
+<created><datetime dst='true'>20201015T114621,89+01</datetime></created>
+<modified><datetime>20201015T133432,54+00</datetime></modified>
+<revised><datetime dst='true'>20201015T142505,88+01</datetime></revised>
+<lastaccessed><datetime>20201015T133432,53+00</datetime></lastaccessed>
+<addedtofile><datetime>20201015T133432,53+00</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
+<designchange><datetime dst='true'>20201015T142505,85+01</datetime></designchange>
+<trigger type='agentlist'/>
+<documentset type='runonce'/><code event='options'><lotusscript>%REM
+	Agent TestPayloadDoc
+	Created Oct 13, 2020 by Paul S Withers/paulswithers
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "FoundryHttpHelper"
+
+</lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
+	Dim s As New NotesSession
+	Dim doc As NotesDocument
+	Dim httpRequest As NotesAgent_FoundryHttpHelper
+	
+	On Error GoTo logErr
+	
+	Set doc = s.Documentcontext
+	Set httpRequest = New NotesAgent_FoundryHttpHelper(doc)
+	Call httpRequest.SetLogErrorOnBadPointer(True)
+	If (httpRequest.isWebRequest()) Then
+		If (httpRequest.IsValid()) Then
+			MsgBox httpRequest.getActionDocUnid()
+			Call httpRequest.updateActionDoc()
+			Call httpRequest.getActionDoc().save(True, False)
+			Call httpRequest.addReturnFieldsToResponseBody()
+		Else
+			MsgBox "***NOT FOUNDRY SPEC***"
+		End If
+	End If
+	
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	If (httpRequest.isWebRequest()) Then
+		Call httpRequest.closeRequestWithError("Unexpected error - " &amp; Error(Err), HTTP_STATUS_CODE_ERROR)
+	End If
+	Exit Sub
+	
+End Sub</lotusscript></code>
+<rundata processeddocs='0' exitcode='0' agentdata='95592CABA45B753D802586020049B6F7'>
+<agentmodified><datetime>20201015T133432,54+00</datetime></agentmodified>
+<agentrun><datetime>20201016T130820,68+00</datetime></agentrun>
+<runlog>Started running agent 'TestFoundryAgent' on 10/16/2020 01:08:20 PM
+Ran LotusScript code
+Done running agent 'TestFoundryAgent' on 10/16/2020 01:08:20 PM
+</runlog></rundata></agent>
+

@@ -1,0 +1,308 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library NotesHttpContent
+	Created Oct 12, 2020 by Paul S Withers/paulswithers
+	Description: Holds only NotesAgent_GenericHTTPHelper
+	
+	We might also want a method to dump the content for this object, for debugging / logging purposes
+%END REM
+Option Public
+Option Declare
+Use "OpenLogFunctions"
+Use "NotesHttpConstants"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class NotesAgent_GenericHTTPHelper
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+%REM
+	Class HTTP_Request
+	Description: Comments for Class
+%END REM
+Class NotesAgent_GenericHTTPHelper
+	Private m_ContentType As String
+	Private m_Method As String
+	Private m_AcceptContentType As String
+	Private m_Headers List As String
+	Private m_QueryParams List As String
+	Private m_ServerProtocol As String
+	Private m_ServerHostname As String
+	Private m_ServerPort As String
+	Private m_Response As NotesJSONObject
+	Private m_valid As Boolean
+	Private m_webRequest As Boolean
+	Private m_RequestBodyString As String
+	Private m_ResponseHeaders List As String
+	Private m_ResponseStatus As Integer
+	Private m_ResponseBody As String
+	Private isClosed As Boolean
+	
+	%REM
+		Sub New
+		Description: Builds a NotesAgent_GenericHTTPContent object from the context document that is passed into an agent.
+		If the agent is called via ...?OpenAgent URL, this will contain HTTP headers and body. 
+		The one we use to validate it's an HTTP request is "QUERY_STRING_DECODED".
+		
+		If it's there, the isValid() method of the object will be true. If not, isValid() will be false.
+		
+		USAGE: Pass in NotesSession.DocumentContext and check isValid() in your code to determine whether the agent was invoked
+		from an HTTP call to ?OpenAgent or some other method. You can also pass the boolean of isValid() to methods in Script 
+		Libraries for conditional processing
+	%END REM
+	Sub New (doc As NotesDocument)
+
+		On Error GoTo logErr
+		
+		m_responseStatus = 200
+		If (doc.Hasitem("REQUEST_METHOD")) Then
+			m_webRequest = True
+			ForAll itm In doc.Items
+				Select Case itm.Name
+				Case "CONTENT_TYPE":
+					m_ContentType = itm.text
+				Case "REQUEST_METHOD":
+					m_Method = UCase(itm.text)
+				Case "SERVER_NAME":
+					m_ServerHostname = itm.text
+				Case "HTTPS":
+					If (itm.text = "OFF") Then
+						m_ServerProtocol = "http://"
+					Else
+						m_ServerProtocol = "https://"
+					End If
+				Case "SERVER_PORT":
+					If (itm.text <> "80" And itm.Text <> "443") Then
+						m_ServerPort = itm.text
+					End If
+				Case "QUERY_STRING":
+					Dim queryVal As String
+					Dim splitVal As Variant, result As Variant
+					Dim x As Integer
+					queryVal = itm.Text
+					If (LCase(queryVal) <> "openagent") Then
+						queryVal = StrRight(LCase(queryVal), "openagent")
+						splitVal = Split(queryVal, "&")
+						For x = 0 To UBound(splitVal)
+							If (splitVal(x) <> "") Then
+								Call parseQueryParam(splitVal(x))
+							End If
+						Next
+					End If
+				Case "REQUEST_CONTENT":
+					m_requestBodyString = itm.text
+				Case Else
+					If (itm.Name Like "HTTP_*") Then
+						If (itm.Name <> "HTTP_") Then
+							m_Headers(StrRight(itm.Name,"HTTP_")) = itm.Text
+							If (itm.Name = "HTTP_ACCEPT") Then
+								m_AcceptContentType = itm.text
+							End If
+						End If
+					End If
+			End Select
+			End ForAll
+		End If
+		m_Valid = True
+
+		Exit Sub
+		
+logErr:
+		Call LogError()
+		m_Valid = False
+		Exit Sub
+	End Sub
+	
+	Sub Delete
+		If (Me.isValid And Not Me.isClosed) Then
+			Call Me.closeRequest()
+		End If
+		Erase me.m_Headers
+		Erase me.m_QueryParams
+	End Sub
+	
+	%REM
+		Sub decodeQueryParam
+		Description: Method for decoding query params. QUERY_STRING_DECODED converts all ampersands and equal signs.
+		This method splits QUERY_STRING first, then decodes the key and value of each query string parameter. 
+		You can retrieve the query string parameters via GetQueryParams() method.
+	%END REM
+	Private Sub parseQueryParam(passedParam As String)
+		
+		Dim keyValue As Variant, decodedKey As Variant, decodedVal As Variant
+
+		On Error GoTo logErr
+
+		keyValue = Split(passedParam, "=")
+		If (UBound(keyValue) <> 1) Then
+			Call LogErrorEx("Invalid param from HTTP Request - '" & passedParam & "'", 0, Nothing)
+		Else
+			decodedKey = Evaluate(|@UrlDecode("Domino"; "| & keyValue(0) & |")|)
+			decodedVal = Evaluate(|@UrlDecode("Domino"; "| & keyValue(1) & |")|)
+			me.m_QueryParams(decodedKey(0)) = decodedVal(0)
+		End If
+		
+		Exit Sub
+		
+logErr:
+		Call LogErrorEx("Invalid param from HTTP Request - '" & passedParam & "'", 0, Nothing)
+		Exit Sub
+	End Sub
+	
+	%REM
+		Function GetContentType
+		Description: Returns Content Type of the request body
+	%END REM
+	Function GetContentType() As String
+		GetContentType = me.m_ContentType
+	End Function
+	
+	%REM
+		Function GetMethod
+		Description: Returns HTTP verb used, upper case. E.g. GET, POST, PUT etc
+	%END REM
+	Function GetMethod() As String
+		GetMethod = me.m_Method
+	End Function
+	
+	%REM
+		Function GetAcceptContentType
+		Description: Content type accepted by the response, e.g. */* or application/json
+	%END REM
+	Function GetAcceptContentType() As String
+		GetAcceptContentType = me.m_AcceptContentType
+	End Function
+	
+	%REM
+		Function getBaseUrl
+		Description: Gets the base URL, by parsing the URL the request was calling
+	%END REM
+	Function GetBaseUrl() As String
+		If (me.m_ServerPort = "") Then
+			GetBaseUrl = me.m_ServerProtocol & me.m_ServerHostname & "/"
+		Else
+			GetBaseUrl = me.m_ServerProtocol & me.m_ServerHostname & ":" & me.m_ServerPort & "/"
+		End If
+	End Function
+
+	%REM
+		Function GetHeader
+		Description: Gets a header param from the request or an empty string, in there was no such param
+	%END REM
+	Function GetHeader(key As String) As String
+		key = Replace(key, "-", "_")
+		If (IsElement(m_Headers(key))) Then
+			GetHeader = m_Headers(key)
+		Else
+			GetHeader = ""
+		End If
+	End Function
+
+	%REM
+		Function GetQueryParam
+		Description: Gets a query param from the request or an empty string, in there was no such param
+	%END REM
+	Function GetQueryParam(key As String) As String
+		key = Replace(key, "-", "_")
+		If (IsElement(m_QueryParams(key))) Then
+			GetQueryParam = m_QueryParams(key)
+		Else
+			GetQueryParam = ""
+		End If
+	End Function
+	
+	%REM
+		Function IsValid
+		Description: Whether the NotesAgent_GenericHTTPContent was instantiated from a valid HTTP request to the Agent
+	%END REM
+	Function IsValid() As Boolean
+		IsValid = m_valid
+	End Function
+	
+	%REM
+		Function isWebRequest
+		Description: Comments for Function
+	%END REM
+	Function isWebRequest() As Boolean
+		isWebRequest = m_webRequest
+	End Function
+	
+	%REM
+		Function GetRequestBodyAsString
+		Description: Gets the Request Body passed in from the HTTP Request as a String
+	%END REM
+	Function GetRequestBodyAsString() As String
+		GetRequestBodyAsString = m_requestBodyString
+	End Function
+	
+	%REM
+		Function GetRequestBodyAsStringSingleLine
+		Description: Gets the Request Body passed in from the HTTP Request as a String without carriage returns or tabs
+	%END REM
+	Function GetRequestBodyAsStringSingleLine() As String
+		GetRequestBodyAsStringSingleLine = FullTrim(Replace(Replace(Replace(m_requestBodyString,Chr(13),""),Chr(10),""),Chr(9),""))
+	End Function
+	
+	%REM
+		Function setResponseStatus
+		Description: Comments for Function
+	%END REM
+	Sub setResponseStatus(code As Integer)
+		m_responseStatus = code
+	End Sub
+	
+	%REM
+		Function getResponseStatus
+		Description: Comments for Function
+	%END REM
+	Function getResponseStatus() As Integer
+		getResponseStatus = m_responseStatus
+	End Function
+
+	%REM
+		Sub setResponseBody
+		Description: Comments for Sub
+	%END REM
+	Sub setResponseBody(content As String)
+		m_ResponseBody = content
+	End Sub
+	
+	%REM
+		Function addResponseHeader
+		Description: Comments for Function
+	%END REM
+	Function addResponseHeader(label As String, value As String) As NotesAgent_GenericHTTPHelper
+		m_ResponseHeaders(label) = value
+		Set addResponseHeader = Me
+	End Function
+	
+	%REM
+		Sub addErrorMessage
+		Description: Comments for Function
+	%END REM
+	Sub closeRequestWithError(msg As String, httpStatus As Integer)
+
+		If (IsNull(httpStatus)) Then
+			m_ResponseStatus = 500
+		Else
+			m_ResponseStatus = httpStatus
+		End If
+		m_responseBody = msg
+		Call closeRequest()
+		
+	End Sub
+	
+	%REM
+		Sub closeRequest
+		Description: Comments for Sub
+	%END REM
+	Sub closeRequest()
+
+		Print |Status:| & CStr(m_responseStatus)
+		ForAll elem In m_ResponseHeaders
+			Print ListTag(elem) & |: | & elem
+		End ForAll
+		Print m_ResponseBody
+		isCLosed = true
+		
+	End Sub
+End Class
