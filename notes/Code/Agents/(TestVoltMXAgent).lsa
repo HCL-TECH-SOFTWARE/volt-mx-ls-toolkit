@@ -2,20 +2,39 @@
 <agent name='(TestVoltMXAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='22'>
+<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='29'>
 <created><datetime dst='true'>20201015T114621,89+01</datetime></created>
-<modified><datetime>20201102T095843,95+00</datetime></modified>
-<revised><datetime>20201102T095843,94+00</datetime></revised>
-<lastaccessed><datetime>20201102T095843,94+00</datetime></lastaccessed>
+<modified><datetime>20201102T150621,40+00</datetime></modified>
+<revised><datetime>20201102T150621,39+00</datetime></revised>
+<lastaccessed><datetime>20201102T150621,39+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133432,53+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T095844,38+00</datetime></designchange>
+<designchange><datetime>20201102T150620,82+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
-	Agent TestPayloadDoc
-	Created Oct 13, 2020 by Paul S Withers/paulswithers
-	Description: Comments for Agent
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
+	
+	Agent to demonstrate use of the Volt MX payload format.
+	
+	To test, send a POST request to this agent with Content-Type header set to "application/json".
+	
+	Request body should be the format documented in VoltMXHttpHelper class:
+	dbPath: the path to a copy of the XPages Extension Library database, available from 
+		https://openntf.org/main.nsf/project.xsp?r=project/XPages%20Extension%20Library
+	unid: an unid of a document in that database
+	payload: fields to change or add in that document
+	returnFields: a list of fields to return from that document
 %END REM
 Option Public
 Option Declare
@@ -33,12 +52,12 @@ Use "VoltMXHttpHelper"
 	Call httpRequest.SetLogErrorOnBadPointer(True)
 	If (httpRequest.isWebRequest()) Then
 		If (httpRequest.IsValid()) Then
-			MsgBox httpRequest.getActionDocUnid()
+			Call LogEvent(httpRequest.ActionDocUnid(), 0, Nothing)
 			Call httpRequest.updateActionDoc()
 			Call httpRequest.getActionDoc().save(True, False)
 			Call httpRequest.addReturnFieldsToResponseBody()
 		Else
-			MsgBox "***NOT FOUNDRY SPEC***"
+			Call LogEvent("***NOT FOUNDRY SPEC***", 0, Nothing)
 		End If
 	End If
 	
@@ -52,11 +71,6 @@ logErr:
 	Exit Sub
 	
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0' agentdata='9994DF48A66F6CD1002586080047CE7D'>
-<agentmodified><datetime>20201021T123559,97+00</datetime></agentmodified>
-<agentrun><datetime>20201029T163817,32+00</datetime></agentrun>
-<runlog>Started running agent 'TestFoundryAgent' on 10/29/2020 04:38:17 PM
-Ran LotusScript code
-Done running agent 'TestFoundryAgent' on 10/29/2020 04:38:17 PM
-</runlog></rundata></agent>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime>20201102T121358,45+00</datetime></agentmodified></rundata></agent>
 

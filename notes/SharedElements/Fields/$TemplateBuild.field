@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sharedfield name='$TemplateBuild' xmlns='http://www.lotus.com/dxl' version='11.0'
+ maintenanceversion='1.0' replicaid='00258602004A9092'>
+<noteinfo noteid='296' unid='F638E7872EF6146A0025861400528A6D' sequence='1'>
+<created><datetime>20201102T150133,89+00</datetime></created>
+<modified><datetime>20201102T150136,41+00</datetime></modified>
+<revised><datetime>20201102T150136,40+00</datetime></revised>
+<lastaccessed><datetime>20201102T150136,40+00</datetime></lastaccessed>
+<addedtofile><datetime>20201102T150136,40+00</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Lotus Notes Template Development/O=Lotus Notes</name><name
+>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<wassignedby><name>CN=Lotus Notes Template Development/O=Lotus Notes</name></wassignedby><field
+ type='text' kind='editable' name='$TemplateBuild'/>
+<item name='$TemplateBuild' sign='true'><text>0.5</text></item>
+<item name='$TemplateBuildName' sign='true'><text>Web Agent Framework</text></item>
+<item name='$TemplateBuildDate' sign='true'><datetime dst='false'>20201102T150300,00-00</datetime></item>
+<item name='$TemplateBuildTool' sign='true'><text>DXL</text></item></sharedfield>
+

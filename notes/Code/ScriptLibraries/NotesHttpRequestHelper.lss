@@ -1,8 +1,16 @@
 '++LotusScript Development Environment:2:5:(Options):0:74
 %REM
-	Library NotesHttpContent
-	Created Oct 12, 2020 by Paul S Withers/paulswithers
-	Description: Holds only NotesAgent_GenericHTTPHelper
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
 	
 	We might also want a method to dump the content for this object, for debugging / logging purposes
 %END REM
@@ -152,37 +160,37 @@ logErr:
 		Function GetContentType
 		Description: Returns Content Type of the request body
 	%END REM
-	Function GetContentType() As String
-		GetContentType = me.m_ContentType
-	End Function
+	Property Get ContentType() As String
+		ContentType = me.m_ContentType
+	End Property
 	
 	%REM
 		Function GetMethod
 		Description: Returns HTTP verb used, upper case. E.g. GET, POST, PUT etc
 	%END REM
-	Function GetMethod() As String
-		GetMethod = me.m_Method
-	End Function
+	Property Get Method() As String
+		Method = me.m_Method
+	End Property
 	
 	%REM
 		Function GetAcceptContentType
 		Description: Content type accepted by the response, e.g. */* or application/json
 	%END REM
-	Function GetAcceptContentType() As String
-		GetAcceptContentType = me.m_AcceptContentType
-	End Function
+	Property Get AcceptContentType() As String
+		AcceptContentType = me.m_AcceptContentType
+	End Property
 	
 	%REM
 		Function getBaseUrl
 		Description: Gets the base URL, by parsing the URL the request was calling
 	%END REM
-	Function GetBaseUrl() As String
+	Property Get BaseUrl() As String
 		If (me.m_ServerPort = "") Then
-			GetBaseUrl = me.m_ServerProtocol & me.m_ServerHostname & "/"
+			BaseUrl = me.m_ServerProtocol & me.m_ServerHostname & "/"
 		Else
-			GetBaseUrl = me.m_ServerProtocol & me.m_ServerHostname & ":" & me.m_ServerPort & "/"
+			BaseUrl = me.m_ServerProtocol & me.m_ServerHostname & ":" & me.m_ServerPort & "/"
 		End If
-	End Function
+	End Property
 
 	%REM
 		Function GetHeader
@@ -230,9 +238,9 @@ logErr:
 		Function GetRequestBodyAsString
 		Description: Gets the Request Body passed in from the HTTP Request as a String
 	%END REM
-	Function GetRequestBodyAsString() As String
-		GetRequestBodyAsString = m_requestBodyString
-	End Function
+	Property Get RequestBodyAsString() As String
+		RequestBodyAsString = m_requestBodyString
+	End Property
 	
 	%REM
 		Function GetRequestBodyAsStringSingleLine
@@ -246,17 +254,25 @@ logErr:
 		Function setResponseStatus
 		Description: Comments for Function
 	%END REM
-	Sub setResponseStatus(code As Integer)
-		m_responseStatus = code
-	End Sub
+	Function setResponseStatus(code As Integer)
+		m_ResponseStatus = code
+	End Function
+	
+	%REM
+		Function setResponseStatus
+		Description: Comments for Function
+	%END REM
+	Property Set ResponseStatus() As Integer
+		m_responseStatus = ResponseStatus
+	End Property
 	
 	%REM
 		Function getResponseStatus
 		Description: Comments for Function
 	%END REM
-	Function getResponseStatus() As Integer
-		getResponseStatus = m_responseStatus
-	End Function
+	Property Get ResponseStatus() As Integer
+		ResponseStatus = m_responseStatus
+	End Property
 
 	%REM
 		Sub setResponseBody

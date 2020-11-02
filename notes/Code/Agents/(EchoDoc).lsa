@@ -2,20 +2,28 @@
 <agent name='(EchoDoc)' xmlns='http://www.lotus.com/dxl' version='11.0' maintenanceversion='1.0'
  replicaid='00258602004A9092' hide='v3' publicaccess='false' designerversion='8.5.3'
  restrictions='unrestricted'>
-<noteinfo noteid='16a' unid='02FCB202D30716A680258602003B2D2A' sequence='2'>
+<noteinfo noteid='16a' unid='02FCB202D30716A680258602003B2D2A' sequence='5'>
 <created><datetime dst='true'>20201015T114621,86+01</datetime></created>
-<modified><datetime>20201015T133431,36+00</datetime></modified>
-<revised><datetime dst='true'>20201015T141637,69+01</datetime></revised>
-<lastaccessed><datetime>20201015T133431,35+00</datetime></lastaccessed>
+<modified><datetime>20201102T150610,05+00</datetime></modified>
+<revised><datetime>20201102T150610,04+00</datetime></revised>
+<lastaccessed><datetime>20201102T150610,04+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133431,35+00</datetime></addedtofile></noteinfo>
-<updatedby><name>CN=Paul S Withers/O=paulswithers</name><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime dst='true'>20201015T141637,67+01</datetime></designchange>
+<designchange><datetime>20201102T150609,48+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
-	Agent EchoDoc
-	Created Oct 14, 2020 by Paul S Withers/paulswithers
-	Description: Comments for Agent
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
 %END REM
 Option Public
 Option Declare
@@ -59,11 +67,6 @@ logErr:
 	Call LogError()
 	Exit Sub 
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0' agentdata='B54F711F1D45EDAE80258601003A7443'>
-<agentmodified><datetime dst='true'>20201014T113626,08+01</datetime></agentmodified>
-<agentrun><datetime dst='true'>20201014T122043,78+01</datetime></agentrun>
-<runlog>Started running agent 'EchoDoc' on 14/10/2020 12:20:28
-Ran LotusScript code
-Done running agent 'EchoDoc' on 14/10/2020 12:20:43
-</runlog></rundata></agent>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime>20201102T103414,88+00</datetime></agentmodified></rundata></agent>
 

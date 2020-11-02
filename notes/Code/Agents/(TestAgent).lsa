@@ -2,20 +2,64 @@
 <agent name='(TestAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='5'>
+<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='22'>
 <created><datetime dst='true'>20201015T114621,88+01</datetime></created>
-<modified><datetime>20201021T155434,65+00</datetime></modified>
-<revised><datetime>20201021T155434,64+00</datetime></revised>
-<lastaccessed><datetime>20201021T155434,64+00</datetime></lastaccessed>
+<modified><datetime>20201102T150618,63+00</datetime></modified>
+<revised><datetime>20201102T150618,62+00</datetime></revised>
+<lastaccessed><datetime>20201102T150618,62+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133432,16+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime dst='true'>20201021T165432,24+01</datetime></designchange>
+<designchange><datetime>20201102T150618,02+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
-	Agent TestAgent
-	Created Oct 9, 2020 by Paul S Withers/paulswithers
-	Description: Comments for Agent
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
+	
+	Agent to extract basic information from a request,
+	demonstrating the methods available for a JSON request.
+	
+	A POST request to this agent should be made from Postman, Node-RED or other tool.
+	Content-Type header should be set as "application/json".
+	Request body should be:
+	{
+		"unid": "83BB7276C4E41B7400258614003C9187",
+		"payload": {
+			"FirstName": "Adrian"
+			"TestVal": 20,
+			"TestBoolean": false
+		},
+		"foo": "bar",
+		"docs": [
+			{
+				"unid": "123456",
+				"FirstName": "Fred",
+				"LastName": "Bloggs"
+			},
+			{
+				"unid": "234567",
+				"FirstName": "John",
+				"LastName": "Doe"
+			},
+			{
+				"unid": "345678",
+				"FirstName": "Jane",
+				"LastName": "Doe"
+			}
+		]
+	}
+	
+	The agent will log content to OpenLog, send back a JSON object "hello": "world",
+	and echo the names from the docs array
 %END REM
 Option Public
 Option Declare
@@ -34,61 +78,56 @@ Use "NotesHttpJsonRequestHelper"
 	Call httpRequest.SetLogErrorOnBadPointer(True)
 	If (httpRequest.isWebRequest()) Then
 		If (httpRequest.IsValid()) Then
-			Msgbox "Yay, valid doc"
-			If (httpRequest.GetMethod() = "POST") Then
-				Msgbox "This was a POST request"
+			If (httpRequest.Method = "POST") Then
+				Call LogEvent("This was a POST request", 0, Nothing)
 			Else
-				Call httpRequest.closeRequestWithError(httpRequest.GetMethod() &amp; " is not a valid HTTP method for this endpoint", HTTP_STATUS_INVALID_METHOD)
+				Call httpRequest.closeRequestWithError(httpRequest.Method &amp; " is not a valid HTTP method for this endpoint", HTTP_STATUS_INVALID_METHOD)
 				Exit Sub
 			End If
-			Msgbox "ContentType: " &amp; httpRequest.GetContentType()
-			Msgbox "Base URL: " &amp; httpRequest.GetBaseUrl()
-			Msgbox "JWT token: " &amp; httpRequest.GetHeader("X-AUTH-TOKEN")
-			Msgbox "Query param: " &amp; httpRequest.GetQueryParam("foo")
-			Msgbox "Body as String: " &amp; Replace(httpRequest.GetRequestBodyAsStringSingleLine(), Chr(13), "")
-			Msgbox ""
-			Msgbox "Body as JSON: " &amp; httpRequest.getRequestBodyAsJson().Stringify()
+			Call LogEvent("ContentType: " &amp; httpRequest.ContentType, 0, Nothing)
+			Call LogEvent("Base URL: " &amp; httpRequest.BaseUrl, 0, Nothing)
+			Call LogEvent("JWT token: " &amp; httpRequest.GetHeader("X-AUTH-TOKEN"), 0, Nothing)
+			Call LogEvent("Query param: " &amp; httpRequest.GetQueryParam("foo"), 0, Nothing)
+			Call LogEvent("Body as String: " &amp; Replace(httpRequest.GetRequestBodyAsStringSingleLine(), Chr(13), ""), 0, Nothing)
+			Call LogEvent("Body as JSON: " &amp; httpRequest.RequestBodyAsJson().Stringify(), 0, Nothing)
 			Call httpRequest.findStringByPointer("/foo", tmpStr)
-			Msgbox "Hello string: " &amp; tmpStr
-			Msgbox "Callback URL: " &amp; httpRequest.getCallbackUrl()
-			
-			Sleep (10)
+			Call LogEvent("foo string: " &amp; tmpStr, 0, Nothing)
 			
 			' Old Style
 			Dim arr As NotesJSONArray
 			Dim obj As NotesJSONObject
 			Call httpRequest.findJsonArrayByPointer("/docs", arr)
 			Set obj = arr.Getfirstelement().value
-			Msgbox "Getting name: " &amp; obj.Getelementbyname("FirstName").Value
+			Call LogEvent("Getting name: " &amp; obj.Getelementbyname("FirstName").Value, 0, Nothing)
 			
 			Call httpRequest.findStringByPointer("/docs/1/FirstName", tmpStr)
-			Msgbox tmpStr
+			Call LogEvent("first name of first doc: " &amp; tmpStr, 0, Nothing)
 			
 			Dim badVal As String
 			Call httpRequest.findStringByPointer("/bar", badVal)
 			If (badVal = "") Then
-				Msgbox "Doesn't exist"
+				Call LogEvent("bar variable doesn't exist", 0, Nothing)
 			Else
-				Msgbox "Something REALLY went wrong, because this shouldn't be here"
+				Call LogEvent("Something REALLY went wrong, because this shouldn't be here", 0, Nothing)
 			End If
 			
 			Dim badDbl As Double
 			If (httpRequest.findDoubleByPointer("/bars", badDbl)) Then
-				Msgbox "Something REALLY went wrong, because this shouldn't be here"
+				Call LogEvent("Something REALLY went wrong, because bars variable shouldn't be here", 0, Nothing)
 			Else
-				Msgbox "Number doesn't exist"
+				Call LogEvent("bars number doesn't exist", 0, Nothing)
 			End If
 			
 			Dim count As Integer
 			count = 1
 			Forall names In httpRequest.GetNotesJSONElementsFromArray(s, "/docs", "/FirstName")
-				Msgbox Cstr(count) &amp; ". " &amp; names.value
+				Call LogEvent(Cstr(count) &amp; ". " &amp; names.value, 0, Nothing)
 				count = count + 1
 			End Forall
 			Call httpRequest.addResponseHeader("Content-Type", "application/json").addResponseHeader("X-AUTH-TOKEN", "Foo")
 			Call httpRequest.getJSONResponseBody().AppendelementFluent("World", "Hello").appendArray("names").appendElementFluent("Fred Bloggs").appendElementFluent("John Doe").appendElementFluent("Jane Doe")
 		Else
-			Msgbox "***NOT JSON***"
+			Call LogEvent("***NOT JSON***", 0, Nothing)
 			Call httpRequest.closeRequestWithError("A JSON body and Content-Type as application/json is expected", HTTP_STATUS_BAD_REQUEST)
 		End If
 	End If
@@ -101,11 +140,6 @@ logErr:
 	Call httpRequest.closeRequestWithError(Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; Cstr(Erl), HTTP_STATUS_CODE_ERROR)
 	Exit Sub
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0' agentdata='8DD804DC788AFBF300258608005767CD'>
-<agentmodified><datetime>20201021T155434,65+00</datetime></agentmodified>
-<agentrun><datetime>20201029T163819,85+00</datetime></agentrun>
-<runlog>Started running agent 'TestAgent' on 10/29/2020 04:38:09 PM
-Ran LotusScript code
-Done running agent 'TestAgent' on 10/29/2020 04:38:19 PM
-</runlog></rundata></agent>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime>20201102T150520,55+00</datetime></agentmodified></rundata></agent>
 

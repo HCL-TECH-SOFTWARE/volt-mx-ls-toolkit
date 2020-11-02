@@ -2,20 +2,32 @@
 <agent name='(RunAgentAsync)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='11'>
+<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='16'>
 <created><datetime dst='true'>20201015T114621,87+01</datetime></created>
-<modified><datetime>20201023T113658,06+00</datetime></modified>
-<revised><datetime>20201023T113658,05+00</datetime></revised>
-<lastaccessed><datetime>20201023T113658,05+00</datetime></lastaccessed>
+<modified><datetime>20201102T150612,60+00</datetime></modified>
+<revised><datetime>20201102T150612,59+00</datetime></revised>
+<lastaccessed><datetime>20201102T150612,59+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133431,74+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime dst='true'>20201023T123656,89+01</datetime></designchange>
+<designchange><datetime>20201102T150612,01+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
-	Agent RunAgentAsync
-	Created Oct 14, 2020 by Paul S Withers/paulswithers
-	Description: Comments for Agent
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
+	
+	Endpoint for triggering an agent async:
+	- Creates a document to be picked up by scheduled agent
+	- Seeds it with key information from the request
 %END REM
 Option Public
 Option Declare
@@ -40,83 +52,81 @@ Use "NotesHttpJsonRequestHelper"
 	If (httpRequest.IsValid()) Then
 		If (httpRequest.findStringByPointer("/dbPath", dbPath)) Then
 			If (httpRequest.findStringByPointer("/agentName", agentName)) Then
-				callbackUrl = httpRequest.getCallbackUrl()
-				If (callbackUrl &lt;&gt; "") Then
-					Call httpRequest.findStringByPointer("/method", method)
-					
-					If (httpRequest.findJsonObjectByPointer("/payload", payload)) Then
-						payloadAsString = |{|
-						Set elem = payload.Getfirstelement()
-						While Not (elem Is Nothing)
-							If (isNotFirstElem) Then
-								payloadAsString = payloadAsString &amp; |,|
-							Else
-								isNotFirstElem = False
-							End If
-							Select Case elem.Type
-							Case Type_JsonNumber:
-							Case Type_JsonBoolean:
-							Case Type_JsonString:
-									' We need to handle date/date-time/time strings!
-								payloadAsString = payloadAsString &amp; |"| &amp; elem.Name &amp; |":"| &amp; Cstr(elem.Value) &amp; |"|
-							Case Else
-								Call LogErrorEx("Unexpected value found for /payload/" &amp; elem.Name, 0, Nothing)
-							End Select
-							Set elem = payload.Getnextelement()
-						Wend
-						payloadAsString = payloadAsString &amp; |}|
-					End If
-					
-					If (httpRequest.findStringByPointer("/unid", unid)) Then
-						If (dbPath = "") Then
-							Set actionDoc = s.Currentdatabase.Getdocumentbyunid(unid)
+				Call httpRequest.findStringByPointer("/callback", callbackUrl)
+				Call httpRequest.findStringByPointer("/method", method)
+				
+				If (httpRequest.findJsonObjectByPointer("/payload", payload)) Then
+					payloadAsString = |{|
+					Set elem = payload.Getfirstelement()
+					While Not (elem Is Nothing)
+						If (isNotFirstElem) Then
+							payloadAsString = payloadAsString &amp; |,|
 						Else
-							Dim db As NotesDatabase
-							Set db = s.Getdatabase("", dbPath, False)
-							If (Not db Is Nothing) Then
-								Set actionDoc = db.Getdocumentbyunid(unid)
-							End If
+							isNotFirstElem = False
 						End If
-					End If
-					
-					Redim m_returnFields(0)
-					If (httpRequest.findJsonArrayByPointer("/returnFields", returnFields)) Then
-						Redim m_returnFields(returnFields.size - 1)
-						Set elem = returnFields.Getfirstelement()
-						counter = 0
-						While Not elem Is Nothing
-							m_returnFields(counter) = elem.value
-							Set elem = returnFields.Getnextelement()
-							counter = counter + 1
-						Wend
-					End If
-					
-					Set schedDoc = s.Currentdatabase.Createdocument()
-					With schedDoc
-						.Form = "AsyncHttpRequest"
-						.agentName = agentName
-						.dbPath = dbPath
-						.method = Ucase(method)
-						.callbackUrl = callbackUrl
-						.payload = payloadAsString
-						If (actionDoc Is Nothing) Then
-							.actionDocUnid = ""						
-						Else
-							.actionDocUnId = actionDoc.universalID
-						End If
-						.requestID = Evaluate(|@Unique|)
-						.status = "Pending"
-						.save True, False
-					End With
-					Call httpRequest.setResponseStatus(201)
-					Call httpRequest.getJSONResponseBody()_
-					.appendElementFluent("Processing", "status")_
-					.appendElementFluent(schedDoc.requestID(0), "requestID")
-					Exit Sub
+						Select Case elem.Type
+						Case Type_JsonNumber:
+						Case Type_JsonBoolean:
+						Case Type_JsonString:
+								' We need to handle date/date-time/time strings!
+							payloadAsString = payloadAsString &amp; |"| &amp; elem.Name &amp; |":"| &amp; Cstr(elem.Value) &amp; |"|
+						Case Else
+							Call LogErrorEx("Unexpected value found for /payload/" &amp; elem.Name, 0, Nothing)
+					End Select
+						Set elem = payload.Getnextelement()
+					Wend
+					payloadAsString = payloadAsString &amp; |}|
 				End If
+				
+				If (httpRequest.findStringByPointer("/unid", unid)) Then
+					If (dbPath = "") Then
+						Set actionDoc = s.Currentdatabase.Getdocumentbyunid(unid)
+					Else
+						Dim db As NotesDatabase
+						Set db = s.Getdatabase("", dbPath, False)
+						If (Not db Is Nothing) Then
+							Set actionDoc = db.Getdocumentbyunid(unid)
+						End If
+					End If
+				End If
+				
+				Redim m_returnFields(0)
+				If (httpRequest.findJsonArrayByPointer("/returnFields", returnFields)) Then
+					Redim m_returnFields(returnFields.size - 1)
+					Set elem = returnFields.Getfirstelement()
+					counter = 0
+					While Not elem Is Nothing
+						m_returnFields(counter) = elem.value
+						Set elem = returnFields.Getnextelement()
+						counter = counter + 1
+					Wend
+				End If
+				
+				Set schedDoc = s.Currentdatabase.Createdocument()
+				With schedDoc
+					.Form = "AsyncHttpRequest"
+					.agentName = agentName
+					.dbPath = dbPath
+					.method = Ucase(method)
+					.callbackUrl = callbackUrl
+					.payload = payloadAsString
+					If (actionDoc Is Nothing) Then
+						.actionDocUnid = ""						
+					Else
+						.actionDocUnId = actionDoc.universalID
+					End If
+					.requestID = Evaluate(|@Unique|)
+					.status = "Pending"
+					.save True, False
+				End With
+				Call httpRequest.setResponseStatus(201)
+				Call httpRequest.getJSONResponseBody()_
+				.appendElementFluent("Processing", "status")_
+				.appendElementFluent(schedDoc.requestID(0), "requestID")
+				Exit Sub
 			End If
 		End If
-		Call httpRequest.closeRequestWithError("agentName, callbackUrl and payload elements are expected in body", HTTP_STATUS_BAD_REQUEST)
+			Call httpRequest.closeRequestWithError("agentName, callbackUrl and payload elements are expected in body", HTTP_STATUS_BAD_REQUEST)
 	End If
 	
 	Exit Sub
@@ -132,11 +142,6 @@ logErr:
 	End Select
 	Exit Sub
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0' agentdata='957323B895F7AC2E0025860A003FD5B2'>
-<agentmodified><datetime>20201023T113658,06+00</datetime></agentmodified>
-<agentrun><datetime>20201029T163854,64+00</datetime></agentrun>
-<runlog>Started running agent 'RunAgentAsync' on 10/29/2020 04:38:54 PM
-Ran LotusScript code
-Done running agent 'RunAgentAsync' on 10/29/2020 04:38:54 PM
-</runlog></rundata></agent>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime>20201102T121304,02+00</datetime></agentmodified></rundata></agent>
 
