@@ -7,7 +7,7 @@ The script libraries are:
 
 - **OpenLogFunctions**: part of Julian Robichaux's excellent [OpenLog](https://openntf.org/main.nsf/project.xsp?r=project/OpenLog) application. The library is included to enable LotusScript compilation.
 - **NotesHttpConstants**: contains constants used within the other script libraries.
-- **FluentNotesJson**: contains wrappers for NotesJson classes, providing fluent methods to allow e.g. `.appendElemenbtFluent("World", "Hello").appendArray("names").appendElementFluent("John Doe").appendElementFluent("Jane Doe")`.
+- **FluentNotesJson**: contains wrappers for NotesJson classes, providing fluent methods to allow e.g. `.appendElementFluent("World", "Hello").appendArray("names").appendElementFluent("John Doe").appendElementFluent("Jane Doe")`.
 - **NotesHttpRequestHelper**: helper class for receiving and processing HTTP calls to Domino agents.
 - **NotesHttpJsonRequestHelper**: helper class for receiving and processing HTTP calls to Domino agents *which receive and return JSON*.
 - **FoundryHttpHelper**: helper class for receiving and processing HTTP calls to Domino agents which receive and return JSON according to the Volt MX schema.

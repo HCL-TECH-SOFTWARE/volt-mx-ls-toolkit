@@ -44,6 +44,7 @@ Class NotesAgent_JsonHTTPHelper As NotesAgent_GenericHTTPHelper
 logErr:
 		Call LogError()
 		m_Valid = False
+		Exit Sub
 	End Sub
 	
 	%REM

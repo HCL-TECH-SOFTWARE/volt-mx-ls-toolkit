@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><note xmlns="http://www.lotus.com/dxl" class="filter" maintenanceversion="1.0" replicaid="00258602004A9092" version="11.0">
-<noteinfo xmlns="" noteid="152" sequence="60" unid="551760F638B4E0C780258602003B23C1">
+<noteinfo xmlns="" noteid="152" sequence="65" unid="551760F638B4E0C780258602003B23C1">
 <created><datetime dst="true">20201015T114557,77+01</datetime></created>
-<modified><datetime>20201016T160059,60+00</datetime></modified>
-<revised><datetime>20201016T160059,59+00</datetime></revised>
-<lastaccessed><datetime>20201016T160059,59+00</datetime></lastaccessed>
+<modified><datetime>20201021T125855,58+00</datetime></modified>
+<revised><datetime>20201021T125855,57+00</datetime></revised>
+<lastaccessed><datetime>20201021T125855,57+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133430,04+00</datetime></addedtofile></noteinfo>
-<updatedby xmlns=""><name>CN=Paul S Withers/O=paulswithers</name><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
+<updatedby xmlns=""><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby xmlns=""><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
 <item xmlns="" name="$Flags"><text>s34Q</text></item>
 <item xmlns="" name="$PublicAccess" sign="true"><text>1</text></item>
-<item xmlns="" name="$TITLE" sign="true"><text>FoundryHttpHelper</text></item>
+<item xmlns="" name="$TITLE" sign="true"><text>VoltMXHttpHelper</text></item>
 <item xmlns="" name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
 
 </note>

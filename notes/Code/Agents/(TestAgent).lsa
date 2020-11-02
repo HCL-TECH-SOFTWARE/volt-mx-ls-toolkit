@@ -2,15 +2,15 @@
 <agent name='(TestAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='4'>
+<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='5'>
 <created><datetime dst='true'>20201015T114621,88+01</datetime></created>
-<modified><datetime>20201015T133432,17+00</datetime></modified>
-<revised><datetime dst='true'>20201015T141637,82+01</datetime></revised>
-<lastaccessed><datetime>20201015T133432,16+00</datetime></lastaccessed>
+<modified><datetime>20201021T155434,65+00</datetime></modified>
+<revised><datetime>20201021T155434,64+00</datetime></revised>
+<lastaccessed><datetime>20201021T155434,64+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133432,16+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime dst='true'>20201015T141637,78+01</datetime></designchange>
+<designchange><datetime dst='true'>20201021T165432,24+01</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Agent TestAgent
@@ -27,66 +27,68 @@ Use "NotesHttpJsonRequestHelper"
 	Dim httpRequest As NotesAgent_JsonHTTPHelper
 	Dim tmpStr As String
 	
-	On Error GoTo logErr
+	On Error Goto logErr
 	
 	Set doc = s.Documentcontext
 	Set httpRequest = New NotesAgent_JsonHTTPHelper(doc)
-	Call httpRequest.SetLogErrorOnBadPointer(true)
+	Call httpRequest.SetLogErrorOnBadPointer(True)
 	If (httpRequest.isWebRequest()) Then
 		If (httpRequest.IsValid()) Then
-			MsgBox "Yay, valid doc"
+			Msgbox "Yay, valid doc"
 			If (httpRequest.GetMethod() = "POST") Then
-				MsgBox "This was a POST request"
+				Msgbox "This was a POST request"
 			Else
 				Call httpRequest.closeRequestWithError(httpRequest.GetMethod() &amp; " is not a valid HTTP method for this endpoint", HTTP_STATUS_INVALID_METHOD)
 				Exit Sub
 			End If
-			MsgBox "ContentType: " &amp; httpRequest.GetContentType()
-			MsgBox "Base URL: " &amp; httpRequest.GetBaseUrl()
-			MsgBox "JWT token: " &amp; httpRequest.GetHeader("X-AUTH-TOKEN")
-			MsgBox "Query param: " &amp; httpRequest.GetQueryParam("foo")
-			MsgBox "Body as String: " &amp; Replace(httpRequest.GetRequestBodyAsStringSingleLine(), Chr(13), "")
-			MsgBox ""
-			MsgBox "Body as JSON: " &amp; httpRequest.getRequestBodyAsJson().Stringify()
+			Msgbox "ContentType: " &amp; httpRequest.GetContentType()
+			Msgbox "Base URL: " &amp; httpRequest.GetBaseUrl()
+			Msgbox "JWT token: " &amp; httpRequest.GetHeader("X-AUTH-TOKEN")
+			Msgbox "Query param: " &amp; httpRequest.GetQueryParam("foo")
+			Msgbox "Body as String: " &amp; Replace(httpRequest.GetRequestBodyAsStringSingleLine(), Chr(13), "")
+			Msgbox ""
+			Msgbox "Body as JSON: " &amp; httpRequest.getRequestBodyAsJson().Stringify()
 			Call httpRequest.findStringByPointer("/foo", tmpStr)
-			MsgBox "Hello string: " &amp; tmpStr
-			MsgBox "Callback URL: " &amp; httpRequest.getCallbackUrl()
+			Msgbox "Hello string: " &amp; tmpStr
+			Msgbox "Callback URL: " &amp; httpRequest.getCallbackUrl()
+			
+			Sleep (10)
 			
 			' Old Style
 			Dim arr As NotesJSONArray
 			Dim obj As NotesJSONObject
 			Call httpRequest.findJsonArrayByPointer("/docs", arr)
 			Set obj = arr.Getfirstelement().value
-			MsgBox "Getting name: " &amp; obj.Getelementbyname("FirstName").Value
+			Msgbox "Getting name: " &amp; obj.Getelementbyname("FirstName").Value
 			
 			Call httpRequest.findStringByPointer("/docs/1/FirstName", tmpStr)
-			MsgBox tmpStr
+			Msgbox tmpStr
 			
 			Dim badVal As String
 			Call httpRequest.findStringByPointer("/bar", badVal)
 			If (badVal = "") Then
-				MsgBox "Doesn't exist"
+				Msgbox "Doesn't exist"
 			Else
-				MsgBox "Something REALLY went wrong, because this shouldn't be here"
+				Msgbox "Something REALLY went wrong, because this shouldn't be here"
 			End If
 			
 			Dim badDbl As Double
 			If (httpRequest.findDoubleByPointer("/bars", badDbl)) Then
-				MsgBox "Something REALLY went wrong, because this shouldn't be here"
+				Msgbox "Something REALLY went wrong, because this shouldn't be here"
 			Else
-				MsgBox "Number doesn't exist"
+				Msgbox "Number doesn't exist"
 			End If
 			
 			Dim count As Integer
 			count = 1
 			Forall names In httpRequest.GetNotesJSONElementsFromArray(s, "/docs", "/FirstName")
-				MsgBox CStr(count) &amp; ". " &amp; names.value
+				Msgbox Cstr(count) &amp; ". " &amp; names.value
 				count = count + 1
-			End ForAll
+			End Forall
 			Call httpRequest.addResponseHeader("Content-Type", "application/json").addResponseHeader("X-AUTH-TOKEN", "Foo")
 			Call httpRequest.getJSONResponseBody().AppendelementFluent("World", "Hello").appendArray("names").appendElementFluent("Fred Bloggs").appendElementFluent("John Doe").appendElementFluent("Jane Doe")
 		Else
-			MsgBox "***NOT JSON***"
+			Msgbox "***NOT JSON***"
 			Call httpRequest.closeRequestWithError("A JSON body and Content-Type as application/json is expected", HTTP_STATUS_BAD_REQUEST)
 		End If
 	End If
@@ -94,16 +96,16 @@ Use "NotesHttpJsonRequestHelper"
 	Exit Sub
 	
 logErr:   
-	MessageBox "Error" &amp; Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; erl
+	Messagebox "Error" &amp; Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; Erl
 	Call LogError()
-	Call httpRequest.closeRequestWithError(Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; CStr(Erl), HTTP_STATUS_CODE_ERROR)
+	Call httpRequest.closeRequestWithError(Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; Cstr(Erl), HTTP_STATUS_CODE_ERROR)
 	Exit Sub
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0' agentdata='50CD2A94713F977800258602004E42F8'>
-<agentmodified><datetime>20201015T133432,17+00</datetime></agentmodified>
-<agentrun><datetime>20201016T123657,04+00</datetime></agentrun>
-<runlog>Started running agent 'TestAgent' on 10/16/2020 12:36:57 PM
+<rundata processeddocs='0' exitcode='0' agentdata='8DD804DC788AFBF300258608005767CD'>
+<agentmodified><datetime>20201021T155434,65+00</datetime></agentmodified>
+<agentrun><datetime>20201029T163819,85+00</datetime></agentrun>
+<runlog>Started running agent 'TestAgent' on 10/29/2020 04:38:09 PM
 Ran LotusScript code
-Done running agent 'TestAgent' on 10/16/2020 12:36:57 PM
+Done running agent 'TestAgent' on 10/29/2020 04:38:19 PM
 </runlog></rundata></agent>
 

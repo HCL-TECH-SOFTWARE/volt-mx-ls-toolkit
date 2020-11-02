@@ -10,11 +10,11 @@ Use "NotesHttpJsonRequestHelper"
 Use "NotesHttpConstants"
 
 '++LotusScript Development Environment:2:5:(Forward):0:1
-Declare Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
+Declare Class NotesAgent_VoltMXHttpHelper As NotesAgent_JsonHTTPHelper
 
 '++LotusScript Development Environment:2:5:(Declarations):0:10
 %REM
-	Class FoundryHttpHelper
+	Class VoltMXHttpHelper
 	Description: Expects a payload of format:
 	{
 		"unid": "3351888600E956CC802585FF004E32E1",
@@ -32,7 +32,7 @@ Declare Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
 		]
 	}
 %END REM
-Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
+Class NotesAgent_VoltMXHttpHelper As NotesAgent_JsonHTTPHelper
 	
 	Private db As NotesDatabase	'Needs to be here, parent database needs to be in memory
 	Private m_actionUnid As String
@@ -67,9 +67,6 @@ Class NotesAgent_FoundryHttpHelper As NotesAgent_JsonHTTPHelper
 			m_actionUnid = unid
 			Set m_actionDoc = db.getdocumentbyUNID(unid)
 			m_Valid = True
-		Else
-			Call closeRequestWithError("Document not found: " & unid, HTTP_STATUS_BAD_REQUEST)
-			Exit Sub
 		End If
 		
 		redim m_returnFields(0)
@@ -94,6 +91,7 @@ logErr:
 		Select Case Err
 			Case 4091:
 				Call LogErrorEx("Invalid document UNID passed to NotesAgent_FoundryHTTPHelper: " & m_actionUnid, 0, Nothing)
+				Call closeRequestWithError("Document not found: " & unid, HTTP_STATUS_BAD_REQUEST)
 			Case Else
 				Call LogError()
 		End Select
