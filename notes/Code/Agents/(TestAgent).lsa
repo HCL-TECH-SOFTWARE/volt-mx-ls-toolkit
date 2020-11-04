@@ -2,15 +2,15 @@
 <agent name='(TestAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='22'>
+<noteinfo noteid='17a' unid='7D1F2760B57296B880258602003B2D2C' sequence='27'>
 <created><datetime dst='true'>20201015T114621,88+01</datetime></created>
-<modified><datetime>20201102T150618,63+00</datetime></modified>
-<revised><datetime>20201102T150618,62+00</datetime></revised>
-<lastaccessed><datetime>20201102T150618,62+00</datetime></lastaccessed>
+<modified><datetime>20201102T170340,47+00</datetime></modified>
+<revised><datetime>20201102T170340,46+00</datetime></revised>
+<lastaccessed><datetime>20201102T170340,46+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133432,16+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T150618,02+00</datetime></designchange>
+<designchange><datetime>20201102T170340,36+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers
@@ -86,7 +86,9 @@ Use "NotesHttpJsonRequestHelper"
 			End If
 			Call LogEvent("ContentType: " &amp; httpRequest.ContentType, 0, Nothing)
 			Call LogEvent("Base URL: " &amp; httpRequest.BaseUrl, 0, Nothing)
+			Call LogEvent("Header keys: " &amp; Implode(httpRequest.HeaderKeys, ","), 0, Nothing)
 			Call LogEvent("JWT token: " &amp; httpRequest.GetHeader("X-AUTH-TOKEN"), 0, Nothing)
+			Call LogEvent("Query param keys: " &amp; Implode(httpRequest.QueryParamKeys, ","), 0, Nothing)
 			Call LogEvent("Query param: " &amp; httpRequest.GetQueryParam("foo"), 0, Nothing)
 			Call LogEvent("Body as String: " &amp; Replace(httpRequest.GetRequestBodyAsStringSingleLine(), Chr(13), ""), 0, Nothing)
 			Call LogEvent("Body as JSON: " &amp; httpRequest.RequestBodyAsJson().Stringify(), 0, Nothing)
@@ -140,6 +142,11 @@ logErr:
 	Call httpRequest.closeRequestWithError(Str(Err) &amp; ": " &amp; Error$ &amp; "," &amp; Cstr(Erl), HTTP_STATUS_CODE_ERROR)
 	Exit Sub
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0'>
-<agentmodified><datetime>20201102T150520,55+00</datetime></agentmodified></rundata></agent>
+<rundata processeddocs='0' exitcode='0' agentdata='8FF793EFA01CAB7200258614005DB93E'>
+<agentmodified><datetime>20201102T170340,47+00</datetime></agentmodified>
+<agentrun><datetime>20201102T170847,71+00</datetime></agentrun>
+<runlog>Started running agent 'TestAgent' on 11/02/2020 05:08:47 PM
+Ran LotusScript code
+Done running agent 'TestAgent' on 11/02/2020 05:08:47 PM
+</runlog></rundata></agent>
 

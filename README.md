@@ -41,7 +41,7 @@ The Volt MX schema expected is:
 There are two sample agents that can be called from Postman or Node-RED, TestAgent and TestFoundryAgent.
 
 - **TestAgent** demonstrates methods for extracting content from header and query parameters, as well as the payload. It also demonstrates the fluent methods for building the response. There are also method calls for building error responses.
-- **TestFoundryAgent** demonstrates using the FoundryHttpHelper for the minimum calls for validating this is a call from the web, validating the existence of the document to act upon, updating all fields based on the payload, saving it and returning the requested fields.
+- **TestVoltMXAgent** demonstrates using the FoundryHttpHelper for the minimum calls for validating this is a call from the web, validating the existence of the document to act upon, updating all fields based on the payload, saving it and returning the requested fields.
 
 ### Async Agent Processing
 
@@ -54,4 +54,4 @@ There are two sample agents that can be called from Postman or Node-RED, TestAge
 - **unid**: the UNID of the document to act upon.
 - **payload**: a set of fields and values to apply to the document.
 
-The **ProcessAsyncRequests** agent picks up any documents at "Pending" status and triggers the relevant agent. Your agent should use the values in the documenbt and send an HTTP request back to the callback URL.
+The **ProcessAsyncRequests** agent picks up any documents at "Pending" status and triggers the relevant agent. Your agent should use the values in the document and send an HTTP request back to the callback URL.

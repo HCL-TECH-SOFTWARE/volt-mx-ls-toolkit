@@ -2,15 +2,15 @@
 <agent name='(TestVoltMXAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='29'>
+<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='30'>
 <created><datetime dst='true'>20201015T114621,89+01</datetime></created>
-<modified><datetime>20201102T150621,40+00</datetime></modified>
-<revised><datetime>20201102T150621,39+00</datetime></revised>
-<lastaccessed><datetime>20201102T150621,39+00</datetime></lastaccessed>
+<modified><datetime>20201102T160748,69+00</datetime></modified>
+<revised><datetime>20201102T160748,68+00</datetime></revised>
+<lastaccessed><datetime>20201102T160748,68+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133432,53+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T150620,82+00</datetime></designchange>
+<designchange><datetime>20201102T160748,37+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers

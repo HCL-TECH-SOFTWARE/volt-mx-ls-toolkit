@@ -32,7 +32,9 @@ Class NotesAgent_GenericHTTPHelper
 	Private m_Method As String
 	Private m_AcceptContentType As String
 	Private m_Headers List As String
+	Private m_HeaderKeys As Variant
 	Private m_QueryParams List As String
+	Private m_QueryParamKeys As Variant
 	Private m_ServerProtocol As String
 	Private m_ServerHostname As String
 	Private m_ServerPort As String
@@ -58,12 +60,14 @@ Class NotesAgent_GenericHTTPHelper
 		Libraries for conditional processing
 	%END REM
 	Sub New (doc As NotesDocument)
+		Dim counter As Integer, queryCounter As Integer
 
 		On Error GoTo logErr
 		
 		m_responseStatus = 200
 		If (doc.Hasitem("REQUEST_METHOD")) Then
 			m_webRequest = True
+			counter = 0
 			ForAll itm In doc.Items
 				Select Case itm.Name
 				Case "CONTENT_TYPE":
@@ -90,9 +94,17 @@ Class NotesAgent_GenericHTTPHelper
 					If (LCase(queryVal) <> "openagent") Then
 						queryVal = StrRight(LCase(queryVal), "openagent")
 						splitVal = Split(queryVal, "&")
+						queryCounter = 0
+						ReDim me.m_queryParamKeys(UBound(splitVal) - 1)
 						For x = 0 To UBound(splitVal)
 							If (splitVal(x) <> "") Then
-								Call parseQueryParam(splitVal(x))
+								If (queryCounter = 0) Then
+									ReDim me.m_queryParamKeys(0)
+								Else
+									ReDim Preserve me.m_queryParamKeys(queryCounter)
+								End If
+								Call parseQueryParam(splitVal(x), queryCounter)
+								queryCounter = queryCounter + 1
 							End If
 						Next
 					End If
@@ -101,10 +113,17 @@ Class NotesAgent_GenericHTTPHelper
 				Case Else
 					If (itm.Name Like "HTTP_*") Then
 						If (itm.Name <> "HTTP_") Then
-							m_Headers(StrRight(itm.Name,"HTTP_")) = itm.Text
+							me.m_Headers(StrRight(itm.Name,"HTTP_")) = itm.Text
 							If (itm.Name = "HTTP_ACCEPT") Then
 								m_AcceptContentType = itm.text
 							End If
+							If (counter = 0) Then
+								ReDim me.m_HeaderKeys(0)
+							Else
+								ReDim Preserve me.m_HeaderKeys(counter)
+							End If
+							me.m_HeaderKeys(counter) = StrRight(itm.Name,"HTTP_")
+							counter = counter + 1
 						End If
 					End If
 			End Select
@@ -134,7 +153,7 @@ logErr:
 		This method splits QUERY_STRING first, then decodes the key and value of each query string parameter. 
 		You can retrieve the query string parameters via GetQueryParams() method.
 	%END REM
-	Private Sub parseQueryParam(passedParam As String)
+	Private Sub parseQueryParam(passedParam As String, x As Integer)
 		
 		Dim keyValue As Variant, decodedKey As Variant, decodedVal As Variant
 
@@ -147,6 +166,7 @@ logErr:
 			decodedKey = Evaluate(|@UrlDecode("Domino"; "| & keyValue(0) & |")|)
 			decodedVal = Evaluate(|@UrlDecode("Domino"; "| & keyValue(1) & |")|)
 			me.m_QueryParams(decodedKey(0)) = decodedVal(0)
+			me.m_QueryParamKeys(x) = decodedKey(0)
 		End If
 		
 		Exit Sub
@@ -193,6 +213,14 @@ logErr:
 	End Property
 
 	%REM
+		Property Get HeaderKeys
+		Description: Comments for Property Get
+	%END REM
+	Property Get HeaderKeys() As Variant
+		HeaderKeys = me.m_HeaderKeys
+	End Property
+
+	%REM
 		Function GetHeader
 		Description: Gets a header param from the request or an empty string, in there was no such param
 	%END REM
@@ -204,6 +232,14 @@ logErr:
 			GetHeader = ""
 		End If
 	End Function
+
+	%REM
+		Property Get QueryParams
+		Description: Comments for Property Get
+	%END REM
+	Property Get QueryParamKeys() As Variant
+		queryParamKeys = me.m_QueryParamKeys
+	End Property
 
 	%REM
 		Function GetQueryParam

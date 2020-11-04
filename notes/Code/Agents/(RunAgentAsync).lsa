@@ -2,15 +2,15 @@
 <agent name='(RunAgentAsync)' xmlns='http://www.lotus.com/dxl' version='11.0'
  maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='16'>
+<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='17'>
 <created><datetime dst='true'>20201015T114621,87+01</datetime></created>
-<modified><datetime>20201102T150612,60+00</datetime></modified>
-<revised><datetime>20201102T150612,59+00</datetime></revised>
-<lastaccessed><datetime>20201102T150612,59+00</datetime></lastaccessed>
+<modified><datetime>20201102T160742,98+00</datetime></modified>
+<revised><datetime>20201102T160742,97+00</datetime></revised>
+<lastaccessed><datetime>20201102T160742,97+00</datetime></lastaccessed>
 <addedtofile><datetime>20201015T133431,74+00</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T150612,01+00</datetime></designchange>
+<designchange><datetime>20201102T160742,67+00</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers
@@ -52,7 +52,7 @@ Use "NotesHttpJsonRequestHelper"
 	If (httpRequest.IsValid()) Then
 		If (httpRequest.findStringByPointer("/dbPath", dbPath)) Then
 			If (httpRequest.findStringByPointer("/agentName", agentName)) Then
-				Call httpRequest.findStringByPointer("/callback", callbackUrl)
+				Call httpRequest.findStringByPointer("/callbackUrl", callbackUrl)
 				Call httpRequest.findStringByPointer("/method", method)
 				
 				If (httpRequest.findJsonObjectByPointer("/payload", payload)) Then
