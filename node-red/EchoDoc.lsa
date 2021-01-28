@@ -1,0 +1,54 @@
+%REM
+	Copyright 2020 Paul Withers
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, 
+	software distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and limitations under the License
+%END REM
+Option Public
+Option Declare
+Use "NotesHttpJsonRequestHelper"
+Sub Initialize
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Dim agent As NotesAgent
+	Dim doc As NotesDocument, actionDoc As NotesDocument
+	Dim httpRequest As NotesHTTPRequest
+	Dim jsonNav As NotesJSONNavigator
+	Dim payload As NotesJSONObject
+	Dim response As String
+	
+	On Error GoTo logErr
+	
+	Sleep (15)
+	Set db = s.Currentdatabase
+	Set agent = s.Currentagent
+	Set doc = db.Getdocumentbyid(agent.Parameterdocid)
+	Set actionDoc = db.Getdocumentbyunid(doc.actionDocUnId(0))
+	Set httpRequest = s.Createhttprequest()
+	If (doc.method(0) = "POST") Then
+		Set jsonNav = s.Createjsonnavigator("")
+		Set payload = jsonNav.Appendobject("response")
+		Call payload.Appendelement(actionDoc.Universalid, "@unid")
+		ForAll itm In actionDoc.Items
+			Call payload.Appendelement(itm.Text, itm.Name)
+		End ForAll
+		Call httpRequest.Setheaderfield("Content-Type", "application/json")
+		httpRequest.Preferstrings = True
+		response = httpRequest.Post(doc.callbackUrl(0), jsonNav.Stringify())
+		doc.status = "Processed"
+		Call doc.save(True, False)
+		MsgBox response
+	End If
+	Exit Sub
+	
+logErr:
+	Call LogError()
+	Exit Sub 
+End Sub

@@ -1,0 +1,90 @@
+%REM
+	Agent UpdateCountAndThreadsBE
+	Created Oct 16, 2020 by Paul Withers/UK/PNPHCL
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+
+Use "VoltMXHttpHelper"
+
+Sub Initialize
+	Dim s As New NotesSession
+	Dim doc As NotesDocument
+	Dim checkName As String, newName As String
+	Dim count As Double
+	
+	On Error GoTo logErr
+	
+	Set doc = s.Documentcontext
+	
+	' UPDATED PW 2020-10-15
+	Dim helper As NotesAgent_VoltMXHttpHelper
+	Set helper = New NotesAgent_VoltMXHttpHelper(doc)
+	If (helper.IsWebRequest()) Then
+		If (Not helper.IsValid()) Then
+			Call helper.closeRequestWithError("Invalid request", HTTP_STATUS_BAD_REQUEST)
+			Exit Sub
+		Else
+			checkName = helper.getActionDoc().FirstName(0) & " " & helper.getActionDoc().LastName(0)
+			Call helper.updateActionDoc()
+			Call helper.getActionDoc().save(True, False)
+			newName = helper.getActionDoc().FirstName(0) & " " & helper.getActionDoc().LastName(0)
+		End If
+	Else
+		checkName = doc.FirstName(0) & " " & doc.LastName(0)
+		newName = InputBox$("Please enter new name", "Name Change", checkName)
+		doc.firstName = StrLeft(newName, " ")
+		doc.lastName = StrRight(newName, " ")
+		Call doc.save(True, False)
+	End If
+	
+	count = updateThreads(Checkname, Newname)
+	If (helper.IsWebRequest()) Then
+		Call helper.addReturnFieldsToResponseBody()
+		Call helper.getJSONResponseBody().appendElement(CStr(count) & " threads updated", "UpdatedThreads")
+	Else
+		MsgBox CStr(count) & " threads updated"
+	End If
+		
+	Exit Sub
+	
+logErr:
+	Call logError()
+	'UPDATED PW 2020-10-15
+	If (helper.IsWebRequest()) Then
+		Call helper.closeRequestWithError("An unexpected error occurred", HTTP_STATUS_CODE_ERROR)
+	End If
+		'END UPDATED PW 2020-10-15
+	Exit Sub
+	
+End Sub
+%REM
+	Function updateThreads
+	Description: Comments for Function
+%END REM
+Function updateThreads(checkName As String, newName As String) As Double
+
+	On Error GoTo logErr
+
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim ve As NotesViewEntryCollection
+	
+	'checkName = firstName & " " & lastName
+	'newName = Source.FieldGetText("FirstName") & " " & Source.FieldGetText("LastName")
+	'Set db = Source.Document.ParentDatabase
+	' **** ADDED PW 2020-10-15
+	Dim s As New NotesSession
+	Set db = s.Currentdatabase
+	' **** END OF ADDED PW 2020-10-15
+	Set view = db.GetView("AllThreadsByAuthor")
+	Set ve = view.GetAllEntriesByKey(checkName, True)
+	Call ve.StampAll("Author", newName)
+	updateThreads = ve.Count
+		
+	Exit Function
+		
+logErr:
+	Call AddToStackTrace()
+End Function
