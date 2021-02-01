@@ -44,4 +44,4 @@ Feature requests can be raised in the project on GitHub. But they should aim to 
 
 Pull requests are encouraged. The project team will help those new to open source. Pull requests should only include contributions for a single feature request. They may contain multiple bug fixes, if they are small and related.
 
-All contributors need to sign an [OpenNTF Contributor License Agreement](https://openntf.org/main.nsf/page.xsp?name=Get_Involved&subName=Project_Contributor) (ICLA or CCLA). The link gives details of how to complete the CLA. Also update the AUTHORS file. As part of the Pull Request review process, a committer will check to make sure a CLA has been signed.
+If you have not yet done so, the pull request will prompt contributors to sign HCL's CLA. Also update the AUTHORS file.
