@@ -46,9 +46,10 @@ Sub Initialize
 		Call doc.save(True, False)
 		MsgBox response
 	End If
+ExitPoint:
 	Exit Sub
 	
 logErr:
-	Call LogError()
-	Exit Sub 
+	enhLogException ||, ||
+	Resume ExitPoint
 End Sub

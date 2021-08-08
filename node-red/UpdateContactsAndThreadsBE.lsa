@@ -1,7 +1,8 @@
 %REM
 	Agent UpdateCountAndThreadsBE
 	Created Oct 16, 2020 by Paul Withers/UK/PNPHCL
-	Description: Comments for Agent
+	Description: Update a document and its threads
+	Modified 8 AUG 2021 to use Enhanced Log
 %END REM
 Option Public
 Option Declare
@@ -47,16 +48,17 @@ Sub Initialize
 		MsgBox CStr(count) & " threads updated"
 	End If
 		
+ExitPoint:
 	Exit Sub
 	
 logErr:
-	Call logError()
+	enhLogException ||, ||
 	'UPDATED PW 2020-10-15
 	If (helper.IsWebRequest()) Then
 		Call helper.closeRequestWithError("An unexpected error occurred", HTTP_STATUS_CODE_ERROR)
 	End If
-		'END UPDATED PW 2020-10-15
-	Exit Sub
+	'END UPDATED PW 2020-10-15
+	Resume ExitPoint
 	
 End Sub
 %REM
@@ -64,8 +66,6 @@ End Sub
 	Description: Comments for Function
 %END REM
 Function updateThreads(checkName As String, newName As String) As Double
-
-	On Error GoTo logErr
 
 	Dim db As NotesDatabase
 	Dim view As NotesView
@@ -82,9 +82,11 @@ Function updateThreads(checkName As String, newName As String) As Double
 	Set ve = view.GetAllEntriesByKey(checkName, True)
 	Call ve.StampAll("Author", newName)
 	updateThreads = ve.Count
-		
+	
+ExitPoint:
 	Exit Function
-		
-logErr:
-	Call AddToStackTrace()
+ErrorTrap:
+	On Error GoTo 0
+	enhLogException ||, ||
+	Resume ExitPoint 
 End Function
