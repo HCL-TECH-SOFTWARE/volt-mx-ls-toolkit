@@ -18,6 +18,9 @@ Option Declare
 
 
 '++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Property Get NOTESHTTPCONSTANTS_VERSION As String 
+Declare Property Get NOTESHTTPCONSTANTS_RELEASE_DATE As String 
+Declare Property Get NOTESHTTPCONSTANTS_BUILD As String 
 
 '++LotusScript Development Environment:2:5:(Declarations):0:10
 Const BAD_JSON_POINTER = 1501
@@ -35,3 +38,47 @@ Const HTTP_STATUS_BAD_REQUEST = 400
 Const HTTP_STATUS_NOT_ALLOWED = 403
 Const HTTP_STATUS_CODE_ERROR = 500
 Const HTTP_STATUS_INVALID_METHOD = 405
+
+Const TYPENAME_JSONOBJECT 		= |JSON Object|
+Const TYPENAME_JSONARRAY 		= |JSON Array|
+Const TYPENAME_JSONSTRING 		= |String|
+Const TYPENAME_JSONNUMBER 		= |Number|
+Const TYPENAME_JSONBOOLEAN 		= |Boolean|
+Const TYPENAME_JSONEMPTY 		= |empty|
+
+Const ERR_PARAMETER_INVALID = 1195
+Const MSG_PARAMETER_INVALID = |A passed parameter is invalid.  |
+
+Const ERR_BAD_JSON_POINTER = 1501
+Const MSG_BAD_JSON_POINTER = |JSON Pointers are expected to start with "/".  |
+
+Const ERR_BAD_JSON_TYPE = 1502
+Const MSG_BAD_JSON_TYPE = |Invalid Json element type.  |
+
+Const ERR_NOTES_JSON_PARSE_FAILED =  			4842 
+Const MSG_NOTES_JSON_PARSE_FAILED =  			|Unable to parse the JSON.  | 
+
+Const ERR_NOTES_JSON_GET_FAILED =  				4843 
+Const MSG_NOTES_JSON_GET_FAILED =  				|Failed to retrieve the JSON.  | 
+
+Declare Property Get NOTESHTTPCONSTANTS_BUILD As String
+Declare Property Get NOTESHTTPCONSTANTS_VERSION As String 
+Declare Property Get NOTESHTTPCONSTANTS_RELEASE_DATE As String
+Private Const g_NOTESHTTPCONSTANTS_VERSION 		= |0.6.0|
+Private Const g_NOTESHTTPCONSTANTS_BUILD		= |1.1496|
+Private Const g_NOTESHTTPCONSTANTS_RELEASE_DATE = |08 AUG 2021|
+
+'++LotusScript Development Environment:2:3:NOTESHTTPCONSTANTS_VERSION Get:1:8
+Property Get NOTESHTTPCONSTANTS_VERSION As String 
+	NOTESHTTPCONSTANTS_VERSION = g_NOTESHTTPCONSTANTS_VERSION
+End Property
+
+'++LotusScript Development Environment:2:3:NOTESHTTPCONSTANTS_RELEASE_DATE Get:1:8
+Property Get NOTESHTTPCONSTANTS_RELEASE_DATE As String 
+	NOTESHTTPCONSTANTS_RELEASE_DATE = g_NOTESHTTPCONSTANTS_RELEASE_DATE
+End Property
+
+'++LotusScript Development Environment:2:3:NOTESHTTPCONSTANTS_BUILD Get:1:8
+Property Get NOTESHTTPCONSTANTS_BUILD As String 
+	NOTESHTTPCONSTANTS_BUILD = g_NOTESHTTPCONSTANTS_BUILD
+End Property

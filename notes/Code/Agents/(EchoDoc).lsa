@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <agent name='(EchoDoc)' xmlns='http://www.lotus.com/dxl' version='11.0' maintenanceversion='1.0'
- replicaid='00258602004A9092' hide='v3' publicaccess='false' designerversion='8.5.3'
+ replicaid='8025872B003E39F1' hide='v3' publicaccess='false' designerversion='8.5.3'
  restrictions='unrestricted'>
-<noteinfo noteid='16a' unid='02FCB202D30716A680258602003B2D2A' sequence='6'>
-<created><datetime dst='true'>20201015T114621,86+01</datetime></created>
-<modified><datetime>20201102T160740,60+00</datetime></modified>
-<revised><datetime>20201102T160740,59+00</datetime></revised>
-<lastaccessed><datetime>20201102T160740,59+00</datetime></lastaccessed>
-<addedtofile><datetime>20201015T133431,35+00</datetime></addedtofile></noteinfo>
+<noteinfo noteid='1c2' unid='4B757133FEFF0E048025872B0040EBF2' sequence='23'>
+<created><datetime dst='true'>20210808T124907,06+01</datetime></created>
+<modified><datetime dst='true'>20210808T163500,81+01</datetime></modified>
+<revised><datetime dst='true'>20210808T162608,66+01</datetime></revised>
+<lastaccessed><datetime dst='true'>20210808T163500,80+01</datetime></lastaccessed>
+<addedtofile><datetime dst='true'>20210808T124907,28+01</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T160740,26+00</datetime></designchange>
+<designchange><datetime dst='true'>20210808T162608,63+01</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers, HCL
@@ -39,7 +39,9 @@ Use "NotesHttpJsonRequestHelper"
 	Dim payload As NotesJSONObject
 	Dim response As String
 	
-	On Error GoTo logErr
+	On Error Goto logErr
+	
+	Call instantiateNotesHttplog()
 	
 	Sleep (15)
 	Set db = s.Currentdatabase
@@ -51,22 +53,25 @@ Use "NotesHttpJsonRequestHelper"
 		Set jsonNav = s.Createjsonnavigator("")
 		Set payload = jsonNav.Appendobject("response")
 		Call payload.Appendelement(actionDoc.Universalid, "@unid")
-		ForAll itm In actionDoc.Items
+		Forall itm In actionDoc.Items
 			Call payload.Appendelement(itm.Text, itm.Name)
-		End ForAll
+		End Forall
 		Call httpRequest.Setheaderfield("Content-Type", "application/json")
 		httpRequest.Preferstrings = True
 		response = httpRequest.Post(doc.callbackUrl(0), jsonNav.Stringify())
 		doc.status = "Processed"
 		Call doc.save(True, False)
-		MsgBox response
+		Msgbox response
 	End If
+	
+ExitPoint:
 	Exit Sub
 	
 logErr:
-	Call LogError()
-	Exit Sub 
+	On Error GoTo 0
+	enhLogAction ||, || 
+	Resume ExitPoint
 End Sub</lotusscript></code>
 <rundata processeddocs='0' exitcode='0'>
-<agentmodified><datetime>20201102T103414,88+00</datetime></agentmodified></rundata></agent>
+<agentmodified><datetime dst='true'>20210808T134351,28+01</datetime></agentmodified></rundata></agent>
 

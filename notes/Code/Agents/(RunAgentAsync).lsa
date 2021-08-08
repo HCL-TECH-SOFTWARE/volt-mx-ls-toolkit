@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <agent name='(RunAgentAsync)' xmlns='http://www.lotus.com/dxl' version='11.0'
- maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
+ maintenanceversion='1.0' replicaid='8025872B003E39F1' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='172' unid='97C71EE24C094AF980258602003B2D2B' sequence='17'>
-<created><datetime dst='true'>20201015T114621,87+01</datetime></created>
-<modified><datetime>20201102T160742,98+00</datetime></modified>
-<revised><datetime>20201102T160742,97+00</datetime></revised>
-<lastaccessed><datetime>20201102T160742,97+00</datetime></lastaccessed>
-<addedtofile><datetime>20201015T133431,74+00</datetime></addedtofile></noteinfo>
+<noteinfo noteid='1ca' unid='97F3ACB8F4ED27EC8025872B0040EBF3' sequence='23'>
+<created><datetime dst='true'>20210808T124907,07+01</datetime></created>
+<modified><datetime dst='true'>20210808T163500,85+01</datetime></modified>
+<revised><datetime dst='true'>20210808T162608,73+01</datetime></revised>
+<lastaccessed><datetime dst='true'>20210808T163500,84+01</datetime></lastaccessed>
+<addedtofile><datetime dst='true'>20210808T124907,43+01</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T160742,67+00</datetime></designchange>
+<designchange><datetime dst='true'>20210808T162608,68+01</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers, HCL
@@ -68,10 +68,10 @@ Use "NotesHttpJsonRequestHelper"
 						Case Type_JsonNumber:
 						Case Type_JsonBoolean:
 						Case Type_JsonString:
-								' We need to handle date/date-time/time strings!
+							' We need to handle date/date-time/time strings!
 							payloadAsString = payloadAsString &amp; |"| &amp; elem.Name &amp; |":"| &amp; Cstr(elem.Value) &amp; |"|
 						Case Else
-							Call LogErrorEx("Unexpected value found for /payload/" &amp; elem.Name, 0, Nothing)
+							enhLogException ||, |Unexpected value found for /payload/| &amp; elem.Name
 					End Select
 						Set elem = payload.Getnextelement()
 					Wend
@@ -126,22 +126,27 @@ Use "NotesHttpJsonRequestHelper"
 				Exit Sub
 			End If
 		End If
-			Call httpRequest.closeRequestWithError("agentName, callbackUrl and payload elements are expected in body", HTTP_STATUS_BAD_REQUEST)
+		Call httpRequest.closeRequestWithError("agentName, callbackUrl and payload elements are expected in body", HTTP_STATUS_BAD_REQUEST)
 	End If
 	
 	Exit Sub
 	
 logErr:
 	Select Case Err
-	Case 4091:
-		Call LogErrorEx("Invalid document UNID passed to NotesAgent_FoundryHTTPHelper: " &amp; unid, 0, Nothing)
-		Call httpRequest.closeRequestWithError("Invalid document UNID passed", HTTP_STATUS_BAD_REQUEST)
-	Case Else:
-		Call LogError()
-		Call httpRequest.closeRequestWithError(|{"error":"Unexpected error in processing"}|, HTTP_STATUS_CODE_ERROR)
+		Case 4091:
+			enhLogException ||, |Invalid document UNID passed to NotesAgent_FoundryHTTPHelper: | &amp; unid
+			Call httpRequest.closeRequestWithError("Invalid document UNID passed", HTTP_STATUS_BAD_REQUEST)
+		Case Else:
+			enhLogAction ||, || 
+			Call httpRequest.closeRequestWithError(|{"error":"Unexpected error in processing"}|, HTTP_STATUS_CODE_ERROR)
 	End Select
 	Exit Sub
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0'>
-<agentmodified><datetime>20201102T121304,02+00</datetime></agentmodified></rundata></agent>
+<rundata processeddocs='0' exitcode='0' agentdata='059AB3544CB9BCC78025872B00555A46'>
+<agentmodified><datetime dst='true'>20210808T162608,74+01</datetime></agentmodified>
+<agentrun><datetime dst='true'>20210808T163216,70+01</datetime></agentrun>
+<runlog>Started running agent 'RunAgentAsync' on 08/08/2021 16:32:16
+Ran LotusScript code
+Done running agent 'RunAgentAsync' on 08/08/2021 16:32:16
+</runlog></rundata></agent>
 

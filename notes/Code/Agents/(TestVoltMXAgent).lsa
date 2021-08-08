@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <agent name='(TestVoltMXAgent)' xmlns='http://www.lotus.com/dxl' version='11.0'
- maintenanceversion='1.0' replicaid='00258602004A9092' hide='v3' publicaccess='false'
+ maintenanceversion='1.0' replicaid='8025872B003E39F1' hide='v3' publicaccess='false'
  designerversion='8.5.3'>
-<noteinfo noteid='182' unid='37CA569C9F9948F080258602003B2D2D' sequence='30'>
-<created><datetime dst='true'>20201015T114621,89+01</datetime></created>
-<modified><datetime>20201102T160748,69+00</datetime></modified>
-<revised><datetime>20201102T160748,68+00</datetime></revised>
-<lastaccessed><datetime>20201102T160748,68+00</datetime></lastaccessed>
-<addedtofile><datetime>20201015T133432,53+00</datetime></addedtofile></noteinfo>
+<noteinfo noteid='26a' unid='34E0DFC8032682868025872B0054EE9C' sequence='1'>
+<created><datetime dst='true'>20210808T162741,08+01</datetime></created>
+<modified><datetime dst='true'>20210808T163500,83+01</datetime></modified>
+<revised><datetime dst='true'>20210808T162741,11+01</datetime></revised>
+<lastaccessed><datetime dst='true'>20210808T163500,82+01</datetime></lastaccessed>
+<addedtofile><datetime dst='true'>20210808T163500,82+01</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></updatedby>
 <wassignedby><name>CN=Paul Withers/OU=UK/O=PNPHCL</name></wassignedby>
-<designchange><datetime>20201102T160748,37+00</datetime></designchange>
+<designchange><datetime dst='true'>20210808T161151,12+01</datetime></designchange>
 <trigger type='agentlist'/>
 <documentset type='runonce'/><code event='options'><lotusscript>%REM
 	Copyright 2020 Paul Withers, HCL
@@ -47,30 +47,39 @@ Use "VoltMXHttpHelper"
 	
 	On Error GoTo logErr
 	
+	Call instantiateNotesHttplog()
+	
 	Set doc = s.Documentcontext
 	Set httpRequest = New NotesAgent_VoltMXHttpHelper(doc)
-	Call httpRequest.SetLogErrorOnBadPointer(True)
+	httpRequest.LogErrorOnBadPointer = True
 	If (httpRequest.isWebRequest()) Then
 		If (httpRequest.IsValid()) Then
-			Call LogEvent(httpRequest.ActionDocUnid(), 0, Nothing)
+			enhLogAction ||, |httpRequest.ActionDocUnid()|
 			Call httpRequest.updateActionDoc()
 			Call httpRequest.getActionDoc().save(True, False)
 			Call httpRequest.addReturnFieldsToResponseBody()
 		Else
-			Call LogEvent("***NOT FOUNDRY SPEC***", 0, Nothing)
+			enhLogAction ||, |***NOT FOUNDRY SPEC***|
 		End If
 	End If
 	
+ExitPoint:
 	Exit Sub
 	
 logErr:
-	Call LogError()
+	On Error GoTo 0
+	enhLogAction ||, || 
 	If (httpRequest.isWebRequest()) Then
 		Call httpRequest.closeRequestWithError("Unexpected error - " &amp; Error(Err), HTTP_STATUS_CODE_ERROR)
 	End If
-	Exit Sub
+	Resume ExitPoint
 	
 End Sub</lotusscript></code>
-<rundata processeddocs='0' exitcode='0'>
-<agentmodified><datetime>20201102T121358,45+00</datetime></agentmodified></rundata></agent>
+<rundata processeddocs='0' exitcode='0' agentdata='9C06F00D540E85448025872B005381E3'>
+<agentmodified><datetime dst='true'>20210808T162741,12+01</datetime></agentmodified>
+<agentrun><datetime dst='true'>20210808T163146,51+01</datetime></agentrun>
+<runlog>Started running agent 'TestVoltMXAgent' on 08/08/2021 16:31:46
+Ran LotusScript code
+Done running agent 'TestVoltMXAgent' on 08/08/2021 16:31:46
+</runlog></rundata></agent>
 

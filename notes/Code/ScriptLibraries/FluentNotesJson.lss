@@ -1,6 +1,6 @@
 '++LotusScript Development Environment:2:5:(Options):0:74
 %REM
-	Copyright 2020 Paul Withers, HCL
+	Copyright 2020-2021 HCL America, Inc.
 	Licensed under the Apache License, Version 2.0 (the "License"); 
 	you may not use this file except in compliance with the License. 
 	You may obtain a copy of the License at
@@ -23,6 +23,8 @@ Declare Class NotesJsonNavigatorFluent
 Declare Class NotesJsonArrayFluent
 
 '++LotusScript Development Environment:2:5:(Declarations):0:10
+
+Private Const LIB_PREFIX = |Library: FluentNotesJson.|
 %REM
 	Class NotesJsonNavigatorFluent
 	Description: Comments for Class
@@ -67,7 +69,7 @@ Class NotesJsonNavigatorFluent
 	%END REM
 	Function appendElementFluent(passedValue As Variant, passedName As String) As NotesJsonNavigatorFluent
 		Call m_NotesJsonNavigator.Appendelement(passedValue, passedName)
-		Set appendElementFluent = me
+		Set appendElementFluent = Me
 	End Function
 	
 	%REM
@@ -109,7 +111,7 @@ Class NotesJsonArrayFluent
 	%END REM
 	Function appendElementFluent(passedValue As Variant) As NotesJsonArrayFluent
 		m_NotesJsonArray.Appendelement(passedValue)
-		Set appendElementFluent = me
+		Set appendElementFluent = Me
 	End Function
 
 End Class
